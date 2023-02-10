@@ -1,0 +1,83 @@
+.Home{
+    background-color:#f6f8fc;
+    width:100%;
+    height:100vh;
+}
+.Navbar{
+    width:100%;
+    height:11%;
+    display:grid;
+    grid-template-columns:22% 1fr 25%;
+}
+.navIcon{
+    padding:8px;
+    transition:.3s;
+    border-radius:100%
+
+}
+.navIcon:hover{
+    background-color:#27272727;
+    border-radius:100%;
+    cursor: pointer;
+}
+.NavMenuTitle{
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    color:#272727d8;
+    font-size:1.3em;
+    grid-column-gap:12px;
+    margin-left:6%;
+}
+.NavMenuTitle div{
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+    justify-content:center;
+    grid-column-gap:3px;
+    
+
+}
+.searchbar{
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+}
+.input{
+    background-color:#eaf1fb;
+    height:75%;
+    width:96%;
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    outline:none;
+    padding-inline:2%;
+}
+.input input{
+    width:87%;
+    outline:none;
+    border:none;
+    background-color:transparent;
+    font-size:17px;
+}
+.input img {
+    padding:6px;
+}
+.input img:hover{
+    background-color:#27272727;
+    border-radius:100%;
+    cursor: pointer;
+}
+.toolBox{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    grid-template-columns:12px;
+    padding-right:3%;
+    grid-column-gap:6%;
+}
+.identicon{
+    border-radius:100%;
+    cursor: pointer;
+}
