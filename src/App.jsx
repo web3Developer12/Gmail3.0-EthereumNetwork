@@ -12,13 +12,22 @@ import LoadingBar from 'react-top-loading-bar'
 import toast, { Toaster } from 'react-hot-toast';
 
 function App() {
-  const [user,setUser] = useState('')
-  const [inbox,setInbox] = useState([])
-  const [progress,setProgress] = useState(0);
-  const ref = useRef(null)
+  const [user,setUser]         = useState('')
+  const [inbox,setInbox]       = useState([])
+  const [progress,setProgress] = useState(0)
+  const [onFetching,setOnFetching]  = useState(false)
+  const ref                    = useRef(null)
 
   const refreshInbox=async ()=>{
-    fetchInboxSender().then((v)=>setInbox(v))
+
+    setOnFetching(true)
+    ref.current.continuousStart()
+
+    fetchInboxSender().then((v)=>{
+      setInbox(v)
+      setOnFetching(false)
+      ref.current.complete()
+    })
   }
 
   useEffect(()=>{
@@ -43,7 +52,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Loader user={user} setUser={setUser}/>}/>
-          <Route path="/mail" element={<Home refreshInbox={refreshInbox} LoaderRef={ref} user={user} inbox={inbox}/>}/>
+          <Route path="/mail" element={<Home onFetching={onFetching} refreshInbox={refreshInbox} LoaderRef={ref} user={user} inbox={inbox}/>}/>
         </Routes>
       </BrowserRouter>
     </div>

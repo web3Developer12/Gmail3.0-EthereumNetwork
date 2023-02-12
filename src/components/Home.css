@@ -138,6 +138,7 @@ ul li{
     border-bottom-right-radius:23px;
     height:33px;
     cursor: pointer;
+    margin-right:2%;
 }
 .navItemsToggle{
     justify-content:center;
@@ -151,6 +152,9 @@ ul li{
 ul li:hover{
     background-color:rgba(128, 128, 128, 0.13);
     color:black;
+}
+ul li span:nth-child(1){
+    font-size:19px;
 }
 .body-email{
     background-color:white;
@@ -171,12 +175,19 @@ ul li:hover{
 }
 .header-tools{
     display:grid;
-    grid-template-columns:25% 1fr;
+    grid-template-columns:1fr 1fr;
+    padding-inline:.8%;
+    margin-top:1.5%;
+    margin-bottom:1.5%;
+
+
 }
 .header-tools-row{
-    padding:4%;
     margin-inline:1%;
     color:#4b4b4b;
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
 }
 .header-tools-row span{
     font-size:21px;
@@ -276,7 +287,7 @@ ul li:hover{
 }
 .mail-data-start span{
     color:gray;
-    font-size:18px;
+    font-size:21px;
 }
 .mark{
     font-size:15px;
@@ -299,4 +310,54 @@ ul li:hover{
     border-bottom:.1px solid rgba(128, 128, 128, 0.171);
     color:#272727;
     font-size:14px;
+}
+.mail-data-selected{
+    background-color:#c2dbff;
+}
+.selection-banner{
+    background-color:rgba(128, 128, 128, 0.103);
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    font-size:15px;
+    color:rgb(77, 77, 77);
+}
+.num{
+    margin-right:.4%;
+}
+.tool-box-selection{
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+}
+.bulk{
+    background-color:#0b57d0;
+    border:none;
+    color:white;
+    height:100%;
+    margin-left:12%;
+    padding-right:3%;
+    padding-left:1%;
+
+    border-radius:4px;
+    cursor: pointer;
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    border:1px solid #0b57d0;
+
+}
+.bulk-inactive{
+    background-color:transparent;
+    border:1px solid gray;
+    color:gray;
+
+}
+.bulk:hover{
+    background-color:white;
+    border:1px solid #0b57d0;
+    color:#0b57d0;
+
 }
