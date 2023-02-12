@@ -1,0 +1,120 @@
+.Editor{
+    position:fixed;
+    right:0;
+    bottom:0;
+    background-color:white;
+    width:35%;
+    height:68%;
+    margin-right:5%;
+    border-top-left-radius:7px;
+    border-top-right-radius:7px;
+    box-shadow: rgba(0, 0, 0, 0.192) 0px 5px 15px;
+    overflow:hidden;
+    z-index:122;
+}
+.header-edit{
+    background-color:#c2e7ff75;
+    height:9%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding-inline-start:5%;
+    padding-inline-end:2%;
+
+}
+.header-edit p{
+    color:#1a2560;
+    font-size:15px;
+}
+.closeBtn{
+    color:#272727;
+    font-size:16px;
+    cursor: pointer;
+    padding:6px;
+    transition:.3s;
+    border-radius:100%;
+}
+.closeBtn:hover{
+    background-color:rgba(128, 128, 128, 0.11);
+}
+.inputEditor{
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    padding-inline-start:5%;
+    height:36px;
+}
+.inputEditor .input1{
+    border:none;
+    outline:none;
+    margin-left:4%;
+}
+.inputEditor .input2{
+    border:none;
+    outline:none;
+    font-size:14px;
+}
+.markdownEditor{
+    width:100%;
+    height:100%;
+}
+textarea{
+    width:90%;
+    height:64%;
+    padding-inline-start:5%;
+    resize:none;
+    outline:none;
+    border:none;
+    overflow-x:hidden;
+    overflow-y:scroll;
+    text-align:justify;
+
+}
+.toolBoxEditor{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-inline:4%;
+}
+.toolBoxS{
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+}
+
+.tool-icn{
+    font-size:19px;
+    color:#272727;
+    cursor: pointer;
+    transition:.1s;
+    padding:3px;
+    border-radius:100%;
+}
+.tool-icn:hover{
+    background-color:rgba(128, 128, 128, 0.11);
+}
+.toolBoxEditor button{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    grid-column-gap:6px;
+    background-color:#0b57d0;
+    width: 76px;
+    padding:8px;
+    margin-right:7%;
+    border-radius:32px;
+    border:none;
+    color:white;
+    cursor: pointer;
+    transition:.1s;
+    border:.1px solid #0b57d0;
+
+}
+.toolBoxEditor button:hover{
+    background-color:white;
+    border:.1px solid #0b57d0;
+    color:black;
+}
+.toolBoxEditor button span:nth-child(2){
+    font-size:17px;
+}
