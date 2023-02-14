@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 import ABI from "../artifacts/contracts/MailSystem.sol/MailSystem.json"
-const addr = "0x86B502C51CF13CbeF1C0D654428dB8F05E234A14";
+
+const addr = "0xb4dc68E77d5385a834da1984aE21C7C6eFd0E992";
 
 export const fetchInboxSender = async()=>{
 
@@ -34,6 +35,135 @@ export const fetchInboxSender = async()=>{
     }
 }
 
+export const fetchTrashSender= async()=>{
+
+    try{        
+        const {ethereum}     = window;
+        if(ethereum){
+
+            const provider   = new ethers.providers.Web3Provider(ethereum);
+            const signer     = provider.getSigner();
+
+            const contract   = new ethers.Contract(addr,ABI.abi,signer);
+            const res        = await contract.trash();
+            let cleaned =[]
+            for(let data of res){
+                const mailUser={
+                    from:data._from,
+                    to:data._to,
+                    subject:data._subject,
+                    markdown:data._markdown,
+                    timeStamp:parseInt(data._timeStamp._hex,16),
+                }
+                cleaned.push(mailUser)
+            }
+            cleaned.reverse()
+            return cleaned
+            
+        }
+    }catch(err){
+        console.log(err);  
+    }
+}
+
+export const fetchSentSender= async()=>{
+
+    try{        
+        const {ethereum}     = window;
+        if(ethereum){
+
+            const provider   = new ethers.providers.Web3Provider(ethereum);
+            const signer     = provider.getSigner();
+
+            const contract   = new ethers.Contract(addr,ABI.abi,signer);
+            const res        = await contract.sent();
+            let cleaned =[]
+            for(let data of res){
+                const mailUser={
+                    from:data._from,
+                    to:data._to,
+                    subject:data._subject,
+                    markdown:data._markdown,
+                    timeStamp:parseInt(data._timeStamp._hex,16),
+                }
+                cleaned.push(mailUser)
+            }
+            cleaned.reverse()
+            return cleaned
+            
+        }
+    }catch(err){
+        console.log(err);  
+    }
+}
+
+export const fetchUnreadSender= async()=>{
+
+    try{        
+        const {ethereum}     = window;
+        if(ethereum){
+
+            const provider   = new ethers.providers.Web3Provider(ethereum);
+            const signer     = provider.getSigner();
+
+            const contract   = new ethers.Contract(addr,ABI.abi,signer);
+            const res        = await contract.inbox();
+            let cleaned =[]
+            for(let data of res){
+                const mailUser={
+                    from:data._from,
+                    to:data._to,
+                    subject:data._subject,
+                    markdown:data._markdown,
+                    timeStamp:parseInt(data._timeStamp._hex,16),
+                    read     :data._read
+                }
+                if(mailUser.read == false){
+                    cleaned.push(mailUser)
+                }
+            }
+            cleaned.reverse()
+            return cleaned
+            
+        }
+    }catch(err){
+        console.log(err);  
+    }
+}
+export const fetchReadSender= async()=>{
+
+    try{        
+        const {ethereum}     = window;
+        if(ethereum){
+
+            const provider   = new ethers.providers.Web3Provider(ethereum);
+            const signer     = provider.getSigner();
+
+            const contract   = new ethers.Contract(addr,ABI.abi,signer);
+            const res        = await contract.inbox();
+            let cleaned =[]
+            for(let data of res){
+                const mailUser={
+                    from:data._from,
+                    to:data._to,
+                    subject:data._subject,
+                    markdown:data._markdown,
+                    timeStamp:parseInt(data._timeStamp._hex,16),
+                    read     :data._read
+                }
+                if(mailUser.read == true){
+                    cleaned.push(mailUser)
+                }
+            }
+            cleaned.reverse()
+            return cleaned
+            
+        }
+    }catch(err){
+        console.log(err);  
+    }
+}
+
 const body = `
 I'm thinking about the fact I've ne'er been in United States.So I decided to travel with you because It can be the best experience of my life dude What do you think about it
 
@@ -56,6 +186,25 @@ export const ComposeMail = async(to,subject,body)=>{
                 body
             );
             await mail.wait()
+
+        }
+    }catch(err){
+        console.log(err);  
+    }
+}
+
+export const BulkAction = async(indexes)=>{
+
+    try{        
+        const {ethereum}     = window;
+        if(ethereum){
+
+            const provider   = new ethers.providers.Web3Provider(ethereum);
+            const signer     = provider.getSigner();
+
+            const contract   = new ethers.Contract(addr,ABI.abi,signer);
+            const bulkMail   = contract.deleteMail("INBOX",indexes);
+            await bulkMail.wait()
 
         }
     }catch(err){

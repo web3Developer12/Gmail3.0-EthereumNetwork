@@ -3,22 +3,11 @@ import hamburger from '../assets/img/hamburger.svg'
 import logo from '../assets/img/gmail.png';
 import search from '../assets/img/search.svg';
 import filter from '../assets/img/filter.svg';
-import key from '../assets/img/key.svg';
-import info from '../assets/img/info.svg';
 import edit from '../assets/img/edit.svg';
-import inbox from '../assets/img/inbox.svg';
-import star from '../assets/img/star.svg';
-import sent from '../assets/img/send.svg';
-import drafts from '../assets/img/draft.svg';
-import spam from '../assets/img/report.svg';
-import unread from '../assets/img/unread.svg';
-import read from '../assets/img/read.svg';
-import trash from '../assets/img/trash.svg';
-import allMail from '../assets/img/trash.svg';
 import Blockies from 'react-blockies';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Editor from './Editor';
-import { ComposeMail } from '../utils/contract';
+import { BulkAction} from '../utils/contract';
 import {motion} from 'framer-motion'
 import toast from 'react-hot-toast';
 
@@ -80,17 +69,78 @@ function TabContentInbox(props){
         }
     </div>
 }
-function TabContentStarred(props){
+function TabContentGeneral(props){
+
+    const [data,setData] = useState([])
+    
+    const tabContentController = {
+        "trash":props.trash,
+        "sent" :props.sent,
+        "starred":[],
+        "draft":[],
+        "spam":[],
+        "mails":[],
+        "unread":props.unread,
+        "read":props.read,
+
+    }
+
+    const name = ()=>{
+        if(props.indexGeneral == 1){
+            return "starred"
+        }else if(props.indexGeneral == 2){
+            return "sent"
+        }else if(props.indexGeneral== 3){
+            return "draft"
+        }
+        else if(props.indexGeneral == 4){
+            return "spam"
+        }
+        else if(props.indexGeneral == 5){
+            return "mails"
+        }
+        else if(props.indexGeneral == 6){
+            return "unread"
+        }
+        else if(props.indexGeneral == 7){
+            return "read"
+        }
+        else if(props.indexGeneral == 8){
+            return "trash"
+        }
+
+        return ""
+    }
+
+    useEffect(()=>{
+        if(props.indexGeneral == 2){
+            props.refreshSent()
+        }else if(props.indexGeneral == 8){
+            props.refreshTrash() 
+        }else if(props.indexGeneral == 6){
+            props.refreshUnread()
+        }
+        else if(props.indexGeneral == 7){
+            props.refreshRead()
+        }
+    },[props.indexGeneral])
+
     return <div className='data'>
         {
-            [].length == 0 && <div className='no-content mediumRegular'>
-                <p>You don't have any starred mails.</p>
+            tabContentController[name()].length == 0 && <div className='no-content mediumRegular'>
+                <p>You don't have any {name()} mails.</p>
                 
             </div>
         }
         {
-            [].map((e,index)=>{
-                return <div className='mail-data' key={index}>
+            tabContentController[name()].map((e,index)=>{
+                return <motion.div 
+                    initial    =  {{ x:-100,opacity:0}}
+                    animate    =  {{ x: 0  ,opacity:1 }}
+                    exit       =  {{ x:-100,opacity:0}}
+                    transition =  {{ delay:index * 0.06}}
+                    className='mail-data' key={index}
+                >
                     <div className='mail-data-start'>
                         <span className="material-symbols-outlined">check_box_outline_blank</span>
                         <span className="material-symbols-outlined">star</span>
@@ -100,10 +150,9 @@ function TabContentStarred(props){
                         <span className='boldSans'>{e.markdown.substring(0,23)}</span> - <span className='opp'>{e.markdown.slice(-56)}...</span>
                     </p>
                     <p className='mediumSans hour'>{new Date(e.timeStamp).toLocaleTimeString()}</p>
-
                     
 
-                </div>
+                </motion.div>
             })
         }
     </div>
@@ -119,7 +168,8 @@ export default function Home(props){
     const [selectionId,setSelectionId] = useState([])
     const [starredId  ,setStarredId]   = useState([])
     const [bulkFlag,setBulkFlag]       = useState(undefined)
-
+    const [onFocus,setOnFocus]         = useState(false)
+    const [searchValue,setSearchValue] = useState('')
 
     const tabContent = {
         "primary":props.inbox,
@@ -136,27 +186,51 @@ export default function Home(props){
             return "social"
         }
     }
+    const ref = useRef(null);
+
+    const handleClickOutside = event => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setOnFocus(false)
+      }
+    };
+  
+    useEffect(() => {
+      document.addEventListener('click', handleClickOutside);
+      return () => {
+        document.removeEventListener('click', handleClickOutside);
+      };
+    });
+  
     return <div className='Home'>
-        <Editor isOpen={isOpen} setIsOpen={setIsOpen} LoaderRef={props.LoaderRef}/>
+        <Editor refreshInbox={props.refreshInbox} isOpen={isOpen} setIsOpen={setIsOpen} LoaderRef={props.LoaderRef}/>
         
         <div className='Navbar'>
             <div className='NavMenuTitle'>
-                <img src={hamburger} width={28} className='navIcon'/>
+                <img src={hamburger} width={28} className='navIcon' onClick={()=>{
+                    setMenuToggle(!menuToggle)
+                }}/>
                 <div>
                     <img src={logo} width={36}/>
                     <p className='mediumRegular'>Gmail</p>
                 </div>
             </div>
-            <div className='searchbar'>
-                <div className='input'>
-                    <img src={search} width={26}/>
-                    <input type="text" placeholder='Search mail' className='mediumRegular'/>
-                    <img src={filter} width={26}/>
+            
+                <div className='searchbar'>
+                    <div className={`${onFocus == true ? 'input-focus':''} input`}>
+                        <img src={search} width={26}/>
+                        <input value={`${searchValue}`} ref={ref} onFocus={()=>{
+                            setOnFocus(true)
+                        }}  onChange={(e)=>{
+                            setSearchValue(e.target.value)
+                        }} type="text" placeholder='Search mail' className='mediumRegular'/>
+                        <img src={filter} width={26}/>
+                        
+                    </div>
                 </div>
-            </div>
+
             <div className='toolBox'>
-                <span class="material-symbols-outlined">info</span>
-                <span class="material-symbols-outlined">key</span>
+                <span className="material-symbols-outlined">info</span>
+                <span className="material-symbols-outlined">key</span>
 
                 <Blockies
                     seed={props.user.trim().length == 0?props.user:"0xfC4F626a3dfa723E4b501FeE03D1eC5f9f55dcE4"}
@@ -180,55 +254,50 @@ export default function Home(props){
                 {
                     menuToggle == false  && <ul>
                     <li onClick={()=>setIndex(0)} className={index == 0 ?"active":""}>
-                        <span class="material-symbols-outlined">inbox</span>
+                        <span className="material-symbols-outlined">inbox</span>
                         <span className='mediumRegular'>Inbox</span>
                     </li>
                     <li onClick={()=>setIndex(1)} className={index == 1 ?"active":""}>
-                        <span class="material-symbols-outlined">star</span>
+                        <span className="material-symbols-outlined">star</span>
 
                         <span className='mediumRegular'>Starred</span>
                     </li>
                     <li onClick={()=>setIndex(2)} className={index == 2 ?"active":""}>
-                        <span class="material-symbols-outlined">send</span>
+                        <span className="material-symbols-outlined">send</span>
 
                         <span className='mediumRegular'>Sent</span>
                     </li>
                     <li onClick={()=>setIndex(3)} className={index == 3 ?"active":""}>
-                        <span class="material-symbols-outlined">draft</span>
+                        <span className="material-symbols-outlined">draft</span>
 
                         <span className='mediumRegular'>Draft</span>
                     </li>
                     <li onClick={()=>setIndex(4)} className={index == 4 ?"active":""}>
-                    <span class="material-symbols-outlined">report</span>
+                    <span className="material-symbols-outlined">report</span>
                     
                         <span className='mediumRegular'>Spam</span>
                     </li>
                     <li onClick={()=>setIndex(5)} className={index == 5 ?"active":""}>
-                    <span class="material-symbols-outlined">mail</span>
+                    <span className="material-symbols-outlined">mail</span>
 
                         <span className='mediumRegular'>All Mail</span>
                     </li>
                     <li onClick={()=>setIndex(6)} className={index == 6 ?"active":""}>
-                        <span class="material-symbols-outlined">
+                        <span className="material-symbols-outlined">
                         mark_email_unread
                         </span>
 
                         <span className='mediumRegular'>Unread</span>
                     </li>
-                    <li onClick={()=>setIndex(6)} className={index == 7 ?"active":""}>
-                        <span class="material-symbols-outlined">
+                    <li onClick={()=>setIndex(7)} className={index == 7 ?"active":""}>
+                        <span className="material-symbols-outlined">
                         mark_email_read
                         </span>
                         <span className='mediumRegular'>Read</span>
                     </li>
-                     <li onClick={()=>setIndex(6)} className={index == 8 ?"active":""}>
-                        <span class="material-symbols-outlined">
-                        mark_email_read
-                        </span>
-                        <span className='mediumRegular'>Unread</span>
-                    </li>
-                    <li  onClick={()=>setIndex(7)} className={index == 9 ?"active":""}>
-                    <span class="material-symbols-outlined">
+
+                    <li  onClick={()=>setIndex(8)} className={index == 9 ?"active":""}>
+                    <span className="material-symbols-outlined">
                         delete
                         </span>
                         <span className='mediumRegular'>Trash</span>
@@ -247,7 +316,7 @@ export default function Home(props){
                             <span style={onSelect ? {color:"black"}:{}} onClick={()=>{
                                     setOnSelect(!onSelect)
                                     if(onSelect != true){
-                                        setSelectionId([...selectionId,0])
+                                        setSelectionId([...selectionId])
                                     }else{
                                         setSelectionId([])
                                         setStarredId([])
@@ -265,6 +334,7 @@ export default function Home(props){
                                         <span onClick={()=>{
                                             setBulkFlag('star-flag')
                                             setStarredId([...selectionId])
+
                                         }}className="material-symbols-outlined">star</span>
                                         <span className="material-symbols-outlined">report</span>
                                         <span className="material-symbols-outlined">mark_email_read</span>
@@ -285,9 +355,9 @@ export default function Home(props){
                 
                             </div>
                             {
-                                onSelect &&  <button onClick={()=>{
+                                onSelect &&  <button onClick={async ()=>{
                                     if(bulkFlag != undefined){
-                                        alert(`${bulkFlag} for ${selectionId} smart contract`)
+                                        BulkAction(selectionId)
                                     }
                                 }} className={`bulk mediumSans ${selectionId.length == 0?'bulk-inactive':''}`}>
                                 <span className="material-symbols-outlined">precision_manufacturing</span>
@@ -314,7 +384,8 @@ export default function Home(props){
                     {
                         selectionId.length > 0 && <div className='selection-banner mediumSans'><span className='num' style={{color:"black"}}>{selectionId.length.toString()}</span> conversations on this page are selected.  You can select more mail as you want in the page</div>
                     }
-                    <div className='tabs'>
+                    {
+                        index == 0 && <div className='tabs'>
                         <div className='ceil'>
                             <button onClick={()=>setTab(0)} className={tab == 0?"tab-element tab-element-active":"tab-element"}>
                             <span className="material-symbols-outlined" style={{
@@ -343,6 +414,8 @@ export default function Home(props){
                        
 
                     </div>
+                    }
+                    
                     {
                         index == 0 &&
                         <TabContentInbox 
@@ -356,6 +429,37 @@ export default function Home(props){
                             tabController = {tabController}
                             setBulkFlag   = {setBulkFlag}
                             onFetching    = {props.onFetching}
+                        />
+                    }
+                    {
+                        index > 0 &&
+                        <TabContentGeneral 
+                            starredId     = {starredId} 
+                            setStarredId  = {setStarredId} 
+                            onSelect      = {onSelect} 
+                            setOnSelect   = {setOnSelect} 
+                            selectionId   = {selectionId} 
+                            setSelectionId= {setSelectionId} 
+                            tabContent    = {tabContent} 
+                            tabController = {tabController}
+                            setBulkFlag   = {setBulkFlag}
+                            onFetching    = {props.onFetching}
+                            indexGeneral  = {index}
+                            refreshTrash  = {props.refreshTrash}
+                            trash         = {props.trash}
+                            setTrash      = {props.setTrash}
+                            onFetchingTrash = {props.onFetchingTrash}
+                            refreshSent     = {props.refreshSent} 
+                            sent            = {props.sent}
+                            setSent         = {props.setSent}
+
+                            unread          = {props.unread}
+                            refreshUnread   = {props.refreshUnread}
+
+                            read            = {props.read}
+                            refreshRead     = {props.refreshRead}
+
+
                         />
                     }
                    

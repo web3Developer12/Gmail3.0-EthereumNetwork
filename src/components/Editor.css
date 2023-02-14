@@ -3,7 +3,7 @@
     right:0;
     bottom:0;
     background-color:white;
-    width:35%;
+    min-width:445px;
     height:68%;
     margin-right:5%;
     border-top-left-radius:7px;

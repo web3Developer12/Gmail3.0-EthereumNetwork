@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 
-contract MailSystem{
+contract GMail{
 
     struct Mail{
 
@@ -43,7 +43,7 @@ contract MailSystem{
         users[msg.sender]._starred.push(_mail);
     }
     
-    function deleteMail(string calldata _key,uint256[] memory _indexes) external{
+    function trash(string calldata _key,uint256[] memory _indexes) external{
         require(_indexes.length >= 1,"INDEX NOT FOUND");
         if(keccak256(abi.encodePacked(_key)) == keccak256(abi.encodePacked("INBOX"))){
             for(uint256 i=0;i<_indexes.length;i++){

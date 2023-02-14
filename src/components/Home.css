@@ -43,6 +43,11 @@
     align-items:center;
     justify-content:flex-start;
 }
+.searchbar-options{
+    position:absolute;
+    background-color:red;
+    width:90%;
+}
 .input{
     background-color:#eaf1fb;
     height:65%;
@@ -68,6 +73,10 @@
     background-color:#27272727;
     border-radius:100%;
     cursor: pointer;
+}
+.input-focus{
+    background-color:white;
+    box-shadow: rgba(0, 0, 0, 0.068) 0px 3px 8px;
 }
 .toolBox{
     display:flex;
@@ -242,7 +251,7 @@ ul li span:nth-child(1){
     color:#0b57d0;
 }
 .tab-element span:nth-child(1){
-    font-size:21px;
+    font-size:18px;
     cursor: pointer;
     transition:.1s;
     padding:6px;
