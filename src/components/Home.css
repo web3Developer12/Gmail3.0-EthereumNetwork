@@ -7,7 +7,7 @@
     width:100%;
     min-height:11vh;
     display:grid;
-    grid-template-columns:18% 1fr 25%;
+    grid-template-columns:minmax(78px,18%)  minmax(78px,1fr) 25%;
 }
 .navIcon{
     padding:8px;
@@ -28,6 +28,7 @@
     font-size:1.3em;
     grid-column-gap:12px;
     margin-left:6%;
+    overflow:hidden;
 }
 .NavMenuTitle div{
     display:flex;
@@ -39,14 +40,22 @@
 
 }
 .searchbar{
+    position:relative;
     display:flex;
     align-items:center;
     justify-content:flex-start;
+     border-collapse: collapse;
 }
 .searchbar-options{
     position:absolute;
-    background-color:red;
-    width:90%;
+    width:100%;
+    margin-top:125px;
+    background-color:white;
+    box-shadow: rgba(0, 0, 0, 0.068) 0px 3px 8px;
+    border-radius:4px;
+    z-index:23;
+
+
 }
 .input{
     background-color:#eaf1fb;
@@ -77,6 +86,9 @@
 .input-focus{
     background-color:white;
     box-shadow: rgba(0, 0, 0, 0.068) 0px 3px 8px;
+    border-radius:0px;
+    border-radius:8px;
+    border-radius:8px;
 }
 .toolBox{
     display:flex;
@@ -154,8 +166,9 @@ ul li{
 }
 .active{
     background-color:#d3e3fd;
-    color:black;
+    color:#0b57d0;
     font-family:"GoogleSansMedium";
+    pointer-events:none;
 
 }
 ul li:hover{
@@ -369,4 +382,66 @@ ul li span:nth-child(1){
     border:1px solid #0b57d0;
     color:#0b57d0;
 
+}
+
+.options{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    padding-inline-start:3%;
+    padding-inline-end:.2%;
+
+    cursor: pointer;
+    transition:.2s;
+    overflow:hidden;
+    border-left:2px solid #0b57d000;
+    min-height:45px;
+    margin-top:1%;
+
+}
+
+.search-autocomplete{
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    grid-column-gap:3%;
+    width:100%;
+    height: 34px;
+    margin-bottom:1%;
+    border-right:2px solid white;
+
+
+}
+.search-autocomplete:hover{
+    border-right:2px solid #0b57d0;
+    color:#0b57d0;
+}
+.options p span:nth-child(1){
+    font-size:18px;
+    color:gray;
+
+}
+.no-result{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    height: 35px;
+}
+.no-result {
+    color:gray;
+    font-size:15px;
+}
+.no-result span{
+    padding-inline:.6%;
+    color:black;
+}
+.inbox-counter{
+    justify-self:flex-end;
+    align-self:center;
+    width:100%;
+    text-align:end;
+    padding-right:12%;
+    font-size:14px;
 }

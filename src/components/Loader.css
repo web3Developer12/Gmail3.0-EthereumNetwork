@@ -5,10 +5,11 @@
     justify-content:center;
     user-select:none;
     height:100vh;
+    background-color:white;
 }
 .logo-txt{
     font-size:3em;
-    color:#2727278e;
+    color:#27272796;
     display:flex;
     grid-column-gap:4px;
     margin-top:1%;

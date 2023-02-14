@@ -171,6 +171,12 @@ export default function Home(props){
     const [onFocus,setOnFocus]         = useState(false)
     const [searchValue,setSearchValue] = useState('')
 
+    const [suggestion,setSuggestion]   = useState([
+        'QuickNode Team - Subscribe','Amazon Summit - Portal',
+
+    ])
+    const [filteredSearch,setFilteredSearch] = useState(suggestion)
+
     const tabContent = {
         "primary":props.inbox,
         "promotions":[],
@@ -195,11 +201,13 @@ export default function Home(props){
     };
   
     useEffect(() => {
+        
       document.addEventListener('click', handleClickOutside);
       return () => {
         document.removeEventListener('click', handleClickOutside);
       };
     });
+
   
     return <div className='Home'>
         <Editor refreshInbox={props.refreshInbox} isOpen={isOpen} setIsOpen={setIsOpen} LoaderRef={props.LoaderRef}/>
@@ -215,17 +223,59 @@ export default function Home(props){
                 </div>
             </div>
             
-                <div className='searchbar'>
+                <div className='searchbar' ref={ref}>
                     <div className={`${onFocus == true ? 'input-focus':''} input`}>
                         <img src={search} width={26}/>
-                        <input value={`${searchValue}`} ref={ref} onFocus={()=>{
+                        <input value={`${searchValue}`}  onFocus={()=>{
                             setOnFocus(true)
                         }}  onChange={(e)=>{
                             setSearchValue(e.target.value)
+                            const newS=suggestion.filter(element => element.includes(e.target.value))
+                            setFilteredSearch(newS.slice(0,1))
                         }} type="text" placeholder='Search mail' className='mediumRegular'/>
                         <img src={filter} width={26}/>
                         
                     </div>
+
+                    { onFocus && 
+                    <motion.div 
+                    initial    =  {{ y:100,opacity:1}}
+                    animate    =  {{ y: 0  ,opacity:1 }}
+                    transition =  {{ type: 'spring',bounce:1,stiffness: 300,velocity: 6}}
+                        className='searchbar-options'
+                    > 
+                        <div className='options'>
+                            {   filteredSearch.length != 0 &&
+                                filteredSearch.map((el)=>{
+                                    return <motion.p 
+                                    initial    =  {{ x:-100,opacity:0}}
+                                    animate    =  {{ x: 0  ,opacity:1 }}
+                                    exit       =  {{ x:-100,opacity:0}}
+                                    transition =  {{ delay:index * 1}}
+                                    onClick={()=>{
+                                        setSearchValue(el)
+                                        setOnFocus(false)
+                                    }} className='search-autocomplete mediumRegular'>
+                                    <span class="material-symbols-outlined" style={{color:"black"}}>history</span> 
+                                    <span>{el}</span>
+                                </motion.p>
+                                })
+                            }
+                            {   filteredSearch.length == 0 &&
+                                <motion.div 
+                                    initial    =  {{ x:-100,opacity:0}}
+                                    animate    =  {{ x: 0  ,opacity:1 }}
+                                    exit       =  {{ x:-100,opacity:0}}
+                                    transition =  {{ delay:0 * 0.06}}
+                                    className='no-result mediumSans'>
+                                    No results for <span className='boldSans'>{searchValue}</span>
+                                </motion.div>
+                            }
+                            
+                            
+                        </div>
+                    </motion.div>
+                    }
                 </div>
 
             <div className='toolBox'>
@@ -256,16 +306,42 @@ export default function Home(props){
                     <li onClick={()=>setIndex(0)} className={index == 0 ?"active":""}>
                         <span className="material-symbols-outlined">inbox</span>
                         <span className='mediumRegular'>Inbox</span>
+                        {
+                            index == 0  &&  
+                            <motion.span 
+                                initial    =  {{ x:-100,opacity:0}}
+                                animate    =  {{ x: 0  ,opacity:1 }}
+                                exit       =  {{ x:-100,opacity:0}}
+                                transition =  {{ delay:index * 0.06}}
+                                className='boldSans inbox-counter'
+                                >
+                                {props.inbox.length || 0}
+                            </motion.span>
+                        
+                        }
+
                     </li>
                     <li onClick={()=>setIndex(1)} className={index == 1 ?"active":""}>
                         <span className="material-symbols-outlined">star</span>
-
                         <span className='mediumRegular'>Starred</span>
                     </li>
                     <li onClick={()=>setIndex(2)} className={index == 2 ?"active":""}>
                         <span className="material-symbols-outlined">send</span>
 
                         <span className='mediumRegular'>Sent</span>
+                        {
+                            index == 2  &&  
+                            <motion.span 
+                                initial    =  {{ x:-100,opacity:0}}
+                                animate    =  {{ x: 0  ,opacity:1 }}
+                                exit       =  {{ x:-100,opacity:0}}
+                                transition =  {{ delay:index * 0.06}}
+                                className='boldSans inbox-counter'
+                                >
+                                {props.sent.length}
+                            </motion.span>
+                        
+                        }
                     </li>
                     <li onClick={()=>setIndex(3)} className={index == 3 ?"active":""}>
                         <span className="material-symbols-outlined">draft</span>
@@ -288,19 +364,61 @@ export default function Home(props){
                         </span>
 
                         <span className='mediumRegular'>Unread</span>
+
+                        {
+                            index == 6  &&  
+                            <motion.span 
+                                initial    =  {{ x:-100,opacity:0}}
+                                animate    =  {{ x: 0  ,opacity:1 }}
+                                exit       =  {{ x:-100,opacity:0}}
+                                transition =  {{ delay:index * 0.06}}
+                                className='boldSans inbox-counter'
+                                >
+                                {props.unread.length}
+                            </motion.span>
+                        
+                        }
+
+
                     </li>
                     <li onClick={()=>setIndex(7)} className={index == 7 ?"active":""}>
                         <span className="material-symbols-outlined">
                         mark_email_read
                         </span>
                         <span className='mediumRegular'>Read</span>
+                        {
+                            index == 7  &&  
+                            <motion.span 
+                                initial    =  {{ x:-100,opacity:0}}
+                                animate    =  {{ x: 0  ,opacity:1 }}
+                                exit       =  {{ x:-100,opacity:0}}
+                                transition =  {{ delay:index * 0.06}}
+                                className='boldSans inbox-counter'
+                                >
+                                {props.read.length}
+                            </motion.span>
+                        
+                        }
                     </li>
 
-                    <li  onClick={()=>setIndex(8)} className={index == 9 ?"active":""}>
+                    <li  onClick={()=>setIndex(8)} className={index == 8 ?"active":""}>
                     <span className="material-symbols-outlined">
                         delete
                         </span>
                         <span className='mediumRegular'>Trash</span>
+                        {
+                            index == 8  &&  
+                            <motion.span 
+                                initial    =  {{ x:-100,opacity:0}}
+                                animate    =  {{ x: 0  ,opacity:1 }}
+                                exit       =  {{ x:-100,opacity:0}}
+                                transition =  {{ delay:index * 0.06}}
+                                className='boldSans inbox-counter'
+                                >
+                                {props.trash.length}
+                            </motion.span>
+                        
+                        }
                     </li>
 
 
