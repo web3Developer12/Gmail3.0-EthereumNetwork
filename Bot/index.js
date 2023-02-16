@@ -255,11 +255,11 @@ const ABI = {
 let call_num    = 0
 const call = async()=>{
 
-    const provider = await new ethers.providers.JsonRpcProvider(
+    const provdestinationer = await new ethers.provdestinationers.JsonRpcProvdestinationer(
         "https://smart-proportionate-firefly.avalanche-testnet.discover.quiknode.pro/e50e4c28fa84cc37478458351791557262f126f8/ext/bc/C/rpc"
     );
 
-    const wallet   = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+    const wallet   = new ethers.Wallet(process.env.PRIVATE_KEY, provdestinationer);
     const contract = new ethers.Contract(address,ABI.abi, wallet);
     const data     = await contract.getBets();
     console.log(`Have ${data.length} players`)
@@ -272,7 +272,7 @@ const call = async()=>{
 
     /*if(data.length > 0){
         call_num+=1
-        console.log(`[*] BOT CALL CONTRACT ID ${call_num}`)
+        console.log(`[*] BOT CALL CONTRACT destination ${call_num}`)
     }*/
 }
 

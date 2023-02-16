@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@chainlink/contracts": "^0.6.0",
+    "crypto": "^1.0.1",
+    "crypto-js": "^4.1.1",
     "dotenv": "^16.0.3",
     "framer-motion": "^8.5.2",
     "gsap": "^3.11.4",
@@ -22,13 +24,15 @@
     "react-router-dom": "^6.7.0",
     "react-top-loading-bar": "^2.3.1",
     "typewriter-effect": "^2.19.0",
-    "use-sound": "^4.0.1"
+    "use-sound": "^4.0.1",
+    "web3": "^1.8.2"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^2.0.1",
     "@types/react": "^18.0.26",
     "@types/react-dom": "^18.0.9",
     "@vitejs/plugin-react": "^3.0.0",
+    "blake2": "^4.1.1",
     "ethers": "^5.7.2",
     "hardhat": "^2.12.6",
     "vite": "^4.0.0"

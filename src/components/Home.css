@@ -54,6 +54,7 @@
     box-shadow: rgba(0, 0, 0, 0.068) 0px 3px 8px;
     border-radius:4px;
     z-index:23;
+    border:.1px solid rgba(128, 128, 128, 0.301);
 
 
 }
@@ -264,7 +265,7 @@ ul li span:nth-child(1){
     color:#0b57d0;
 }
 .tab-element span:nth-child(1){
-    font-size:18px;
+    font-size:21px;
     cursor: pointer;
     transition:.1s;
     padding:6px;
@@ -305,10 +306,10 @@ ul li span:nth-child(1){
     justify-content:flex-start;
     margin-right:6%;
     grid-column-gap:3%;
-    margin-left:8%;
+    margin-left:7%;
 }
 .mail-data-start span{
-    color:gray;
+    color:rgba(63, 63, 63, 0.342);
     font-size:21px;
 }
 .mark{
@@ -354,15 +355,17 @@ ul li span:nth-child(1){
     align-items:center;
     justify-content:flex-start;
 }
+.tool-box-selection {
+    font-size:18px;
+}
 .bulk{
     background-color:#0b57d0;
     border:none;
     color:white;
     height:100%;
     margin-left:12%;
-    padding-right:3%;
+    padding-right:1%;
     padding-left:1%;
-
     border-radius:4px;
     cursor: pointer;
     display:flex;
@@ -375,6 +378,7 @@ ul li span:nth-child(1){
     background-color:transparent;
     border:1px solid gray;
     color:gray;
+    pointer-events:none;
 
 }
 .bulk:hover{
@@ -444,4 +448,8 @@ ul li span:nth-child(1){
     text-align:end;
     padding-right:12%;
     font-size:14px;
+}
+mark{
+    background-color:#0b57d01e;
+    color:#0b57d0;
 }

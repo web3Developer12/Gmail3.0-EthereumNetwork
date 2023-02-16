@@ -28,10 +28,11 @@ function TabContentInbox(props){
                     animate    =  {{ x: 0  ,opacity:1 }}
                     exit       =  {{ x:-100,opacity:0}}
                     transition =  {{ delay:index * 0.06}}
-                    className={`mail-data ${props.selectionId.includes(index)?"mail-data-selected":""}`} key={index}
+                    key        =  {index}
+                    className={`mail-data ${props.selectionId.includes(index)?"mail-data-selected":""}`}
                 >
                     <div className='mail-data-start'>
-                        <span className="material-symbols-outlined" style={props.onSelect ? {color:"black"}:{}} onClick={()=>{
+                        <span className="material-symbols-outlined" style={props.onSelect ? {color:"black"}:{color:"rgba(63, 63, 63, 0.342)"}} onClick={()=>{
                             props.setOnSelect(true)
                             props.setSelectionId([...props.selectionId,index])
                             if(props.onSelect){
@@ -78,7 +79,7 @@ function TabContentGeneral(props){
         "sent" :props.sent,
         "starred":[],
         "draft":[],
-        "spam":[],
+        "spam":props.spam,
         "mails":[],
         "unread":props.unread,
         "read":props.read,
@@ -122,6 +123,8 @@ function TabContentGeneral(props){
         }
         else if(props.indexGeneral == 7){
             props.refreshRead()
+        }else if(props.indexGeneral == 4){
+            props.refreshSpam()
         }
     },[props.indexGeneral])
 
@@ -134,12 +137,12 @@ function TabContentGeneral(props){
         }
         {
             tabContentController[name()].map((e,index)=>{
-                return <motion.div 
+                return <motion.div key={index}
                     initial    =  {{ x:-100,opacity:0}}
                     animate    =  {{ x: 0  ,opacity:1 }}
                     exit       =  {{ x:-100,opacity:0}}
                     transition =  {{ delay:index * 0.06}}
-                    className='mail-data' key={index}
+                    className='mail-data'
                 >
                     <div className='mail-data-start'>
                         <span className="material-symbols-outlined">check_box_outline_blank</span>
@@ -172,7 +175,7 @@ export default function Home(props){
     const [searchValue,setSearchValue] = useState('')
 
     const [suggestion,setSuggestion]   = useState([
-        'QuickNode Team - Subscribe','Amazon Summit - Portal',
+        'Google Nodes Team - Ethereum'.toLowerCase()
 
     ])
     const [filteredSearch,setFilteredSearch] = useState(suggestion)
@@ -182,6 +185,8 @@ export default function Home(props){
         "promotions":[],
         "social":[]
     }
+
+    const refSuggestion = useRef(null)
 
     const tabController = ()=>{
         if(tab == 0){
@@ -229,9 +234,20 @@ export default function Home(props){
                         <input value={`${searchValue}`}  onFocus={()=>{
                             setOnFocus(true)
                         }}  onChange={(e)=>{
+                    
                             setSearchValue(e.target.value)
-                            const newS=suggestion.filter(element => element.includes(e.target.value))
-                            setFilteredSearch(newS.slice(0,1))
+                            const res = suggestion.filter(element => element.toLowerCase().includes(e.target.value.toLowerCase()))
+                            setFilteredSearch(res.slice(0,1))
+
+                            let pattern  = RegExp(`${e.target.value.toLowerCase()}`)
+
+                            if(refSuggestion.current != null){
+                                refSuggestion.current.innerHTML = refSuggestion.current.innerText.toLowerCase().replace(
+                                    pattern,match=> `<mark>${match}</mark>`
+                                )
+                            }
+                           
+
                         }} type="text" placeholder='Search mail' className='mediumRegular'/>
                         <img src={filter} width={26}/>
                         
@@ -246,8 +262,8 @@ export default function Home(props){
                     > 
                         <div className='options'>
                             {   filteredSearch.length != 0 &&
-                                filteredSearch.map((el)=>{
-                                    return <motion.p 
+                                filteredSearch.map((el,key)=>{
+                                    return <motion.p  key={key}
                                     initial    =  {{ x:-100,opacity:0}}
                                     animate    =  {{ x: 0  ,opacity:1 }}
                                     exit       =  {{ x:-100,opacity:0}}
@@ -256,8 +272,8 @@ export default function Home(props){
                                         setSearchValue(el)
                                         setOnFocus(false)
                                     }} className='search-autocomplete mediumRegular'>
-                                    <span class="material-symbols-outlined" style={{color:"black"}}>history</span> 
-                                    <span>{el}</span>
+                                    <span className="material-symbols-outlined" style={{color:"black"}}>history</span> 
+                                    <span ref={refSuggestion}>{el}</span>
                                 </motion.p>
                                 })
                             }
@@ -286,9 +302,9 @@ export default function Home(props){
                     seed={props.user.trim().length == 0?props.user:"0xfC4F626a3dfa723E4b501FeE03D1eC5f9f55dcE4"}
                     size={10} 
                     scale={3} 
-                    color="rgba(255,255,255,.2)" 
+                    color="rgba(255,255,255,.3)" 
                     bgColor="#0b57d0" 
-                    spotColor="rgba(255,255,255,.2)"
+                    spotColor="rgba(255,255,255,.3)"
                     className="identicon" 
                 />
             </div>
@@ -315,7 +331,7 @@ export default function Home(props){
                                 transition =  {{ delay:index * 0.06}}
                                 className='boldSans inbox-counter'
                                 >
-                                {props.inbox.length || 0}
+                                {props.inbox.length}
                             </motion.span>
                         
                         }
@@ -448,16 +464,44 @@ export default function Home(props){
                             <div className='tool-box-selection'>
                                     {
                                         onSelect && <>
-                                        <span className="material-symbols-outlined">archive</span>
-                                        <span onClick={()=>{
+                                        <span className="material-symbols-outlined" onClick={()=>{
+                                            setBulkFlag('archive-flag')
+                                            setStarredId([...selectionId])
+                                        }}
+                                        style={{
+                                            color:bulkFlag == 'archive-flag'?"#0b57d0":"gray"
+                                        }}>archive</span>
+                                        
+                                        <span style={{
+                                            color:bulkFlag == 'star-flag'?"#0b57d0":"gray"
+                                        }} 
+                                        
+                                        onClick={()=>{
                                             setBulkFlag('star-flag')
                                             setStarredId([...selectionId])
+                                        }}
+                                        className="material-symbols-outlined">star</span>
 
-                                        }}className="material-symbols-outlined">star</span>
-                                        <span className="material-symbols-outlined">report</span>
+                                        <span style={{
+                                            color:bulkFlag == 'spam-flag'?"#0b57d0":"gray"
+                                        }} 
+                                        onClick={()=>{
+                                            setBulkFlag('spam-flag')
+                                            setStarredId([...selectionId])
+
+                                        }}className="material-symbols-outlined">report</span>
+
                                         <span className="material-symbols-outlined">mark_email_read</span>
                                         <span className="material-symbols-outlined">mark_email_unread</span>
-                                        <span className="material-symbols-outlined">delete</span>
+
+                                        <span style={{
+                                            color:bulkFlag == 'trash-flag'?"#0b57d0":"gray"
+                                        }} 
+                                        onClick={()=>{
+                                            setBulkFlag('trash-flag')
+                                            setStarredId([...selectionId])
+                                        }}
+                                        className="material-symbols-outlined">delete</span>
                                         </>
                                     }
                                     {
@@ -474,12 +518,21 @@ export default function Home(props){
                             </div>
                             {
                                 onSelect &&  <button onClick={async ()=>{
-                                    if(bulkFlag != undefined){
-                                        BulkAction(selectionId)
-                                    }
+                                            alert(`Move from ${index}`)
+                                            if(index == 0 && bulkFlag == "trash-flag"){
+                                                await BulkAction(0,3,selectionId).wait()
+                                                setOnSelect(false)
+                                                props.refreshInbox()
+
+
+                                            }else if(index == 0 && bulkFlag == "spam-flag"){
+                                                await BulkAction(0,2,selectionId).wait()
+                                                props.refreshInbox()
+                                            }
+                                            setOnSelect(false)
+
                                 }} className={`bulk mediumSans ${selectionId.length == 0?'bulk-inactive':''}`}>
-                                <span className="material-symbols-outlined">precision_manufacturing</span>
-                                Bulk
+                                <span className="material-symbols-outlined">fingerprint</span>
                                 </button>
                             }
                             
@@ -576,6 +629,9 @@ export default function Home(props){
 
                             read            = {props.read}
                             refreshRead     = {props.refreshRead}
+
+                            spam            = {props.spam}
+                            refreshSpam     = {props.refreshSpam}
 
 
                         />

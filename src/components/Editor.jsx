@@ -10,6 +10,7 @@ export default function Editor(props){
         open  :{ y: 0  ,opacity:1 },
         closed:{ y:410  ,opacity:1 }
     }
+    const [to,setTo] = useState('')
     const [subject,setSubject] = useState('')
     const [body,setBody]       = useState('')
  
@@ -36,7 +37,7 @@ export default function Editor(props){
         <div className='destination'>
             <div className='inputEditor'>
                 <p className='mediumRegular'>To</p>
-                <input className='input1' type="text" placeholder="0x0000000000000000000000000000000000000000"/>
+                <input value={to} onChange={(e)=>setTo(e.target.value)} className='input1' type="text" placeholder="0x0000000000000000000000000000000000000000"/>
             </div>
             <div className='inputEditor'>
                 <input value={subject} onChange={(e)=>setSubject(e.target.value)} className='input2' type="text" placeholder="Subject"/>
@@ -53,7 +54,7 @@ export default function Editor(props){
                                 setSubject('');
                                 setBody('');
                                 props.setIsOpen(false);
-                                await ComposeMail("",subject,body)
+                                await ComposeMail(to,subject,body)
                                 props.LoaderRef.current.complete()
                                 props.refreshInbox()
                                 toast("Message sent")

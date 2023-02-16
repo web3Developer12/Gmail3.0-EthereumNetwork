@@ -50,7 +50,7 @@ contract MailSystem{
 
             uint256 _mailIndex = _indexes[i];
             /*origin destination STAND FOR THE ORIGIN OF THE MOVE =======> MANAGEMENT*/
-            if              (origin == 0){
+            if    (origin == 0){
                 /*origin destination:0 => INBOX*/
                 if     (destination == 1){
                     /*MOVE EMAIL INBOX TO STARRED*/
@@ -65,12 +65,8 @@ contract MailSystem{
                     /*MOVE EMAIL INBOX TO TRASH*/
                     users[msg.sender]._trash.push(users[msg.sender]._inbox[_mailIndex]);
                 }
-                else if(destination == 4){
-                    /*MOVE EMAIL INBOX TO ARCHIVE*/
-                    users[msg.sender]._archive.push(users[msg.sender]._inbox[_mailIndex]);
-                }
             }
-            else if         (origin == 1){
+            else if    (origin == 1){
                 /*origin destination:1 => ARCHIVE*/
                 if     (destination == 1){
                     /*MOVE EMAIL ARCHIVE TO STARRED*/
@@ -186,11 +182,7 @@ contract MailSystem{
             }  
         }
         
-    }
-
-    function mark(uint256 origin,uint256 to,uint256[] memory indexes) external{
-        /*Mark mail as star,read,unread*/
-    } 
+    }   
 
     function inbox() external view returns(Mail[] memory){
         return users[msg.sender]._inbox;

@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import ABI from "../artifacts/contracts/MailSystem.sol/MailSystem.json"
 
-const addr = "0xb4dc68E77d5385a834da1984aE21C7C6eFd0E992";
+const addr = "0x4bDb4c1F233B7B629D97e9de93F51699933F51D9";
 
 export const fetchInboxSender = async()=>{
 
@@ -163,6 +163,39 @@ export const fetchReadSender= async()=>{
         console.log(err);  
     }
 }
+export const fetchSpamSender= async()=>{
+
+    try{        
+        const {ethereum}     = window;
+        if(ethereum){
+
+            const provider   = new ethers.providers.Web3Provider(ethereum);
+            const signer     = provider.getSigner();
+
+            const contract   = new ethers.Contract(addr,ABI.abi,signer);
+            const res        = await contract.spam();
+            let cleaned =[]
+            for(let data of res){
+                const mailUser={
+                    from:data._from,
+                    to:data._to,
+                    subject:data._subject,
+                    markdown:data._markdown,
+                    timeStamp:parseInt(data._timeStamp),
+                    read     :data._read
+                }
+                cleaned.push(mailUser)
+                
+            }
+            cleaned.reverse()
+            return cleaned
+            
+        }
+    }catch(err){
+        console.log(err);  
+    }
+}
+
 
 const body = `
 I'm thinking about the fact I've ne'er been in United States.So I decided to travel with you because It can be the best experience of my life dude What do you think about it
@@ -181,7 +214,7 @@ export const ComposeMail = async(to,subject,body)=>{
 
             const contract   = new ethers.Contract(addr,ABI.abi,signer);
             const mail       = await contract.compose(
-                "0x09Fb3241eB329444A99Bcb24c66BD7B0658D00ba",
+                to,
                 subject,
                 body
             );
@@ -193,7 +226,7 @@ export const ComposeMail = async(to,subject,body)=>{
     }
 }
 
-export const BulkAction = async(indexes)=>{
+export const BulkAction = async(origin,to,indexes)=>{
 
     try{        
         const {ethereum}     = window;
@@ -203,9 +236,8 @@ export const BulkAction = async(indexes)=>{
             const signer     = provider.getSigner();
 
             const contract   = new ethers.Contract(addr,ABI.abi,signer);
-            const bulkMail   = contract.deleteMail("INBOX",indexes);
+            const bulkMail   = contract.move(origin,to,indexes);
             await bulkMail.wait()
-
         }
     }catch(err){
         console.log(err);  

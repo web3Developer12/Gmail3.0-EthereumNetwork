@@ -43,7 +43,7 @@ describe("Lock", function () {
         deployOneYearLockFixture
       );
 
-      expect(await ethers.provider.getBalance(lock.address)).to.equal(
+      expect(await ethers.provdestinationer.getBalance(lock.address)).to.equal(
         lockedAmount
       );
     });
@@ -59,7 +59,7 @@ describe("Lock", function () {
   });
 
   describe("Withdrawals", function () {
-    describe("Validations", function () {
+    describe("Valdestinationations", function () {
       it("Should revert with the right error if called too soon", async function () {
         const { lock } = await loadFixture(deployOneYearLockFixture);
 

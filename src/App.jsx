@@ -7,9 +7,22 @@ import Loader from './components/Loader'
 import Home from './components/Home'
 import { getAuthorizedAccounts } from './utils/wallet'
 import { useEffect,useRef } from 'react'
-import { ComposeMail, fetchInboxSender, fetchReadSender, fetchSentSender, fetchTrashSender, fetchUnreadSender } from './utils/contract'
+import { ComposeMail, fetchInboxSender, fetchReadSender, fetchSentSender, fetchSpamSender, fetchTrashSender, fetchUnreadSender } from './utils/contract'
 import LoadingBar from 'react-top-loading-bar'
 import toast, { Toaster } from 'react-hot-toast';
+import Web3 from 'web3'
+import CryptoJS from 'crypto-js'
+import Signature from './components/Signature'
+
+function generateColorFromAddress(address) {
+  const hashInput = Web3.utils.toHex(address);
+  const hash = CryptoJS.SHA256(hashInput).toString();
+  const subset = hash.substring(0, 8);
+  const integer = parseInt(subset, 16);
+  const paddedHex = integer.toString(16).padStart(6, '0');
+  const color = `#${paddedHex}`;
+  return color;
+}
 
 function App() {
 
@@ -18,7 +31,10 @@ function App() {
   const [trash,setTrash]       = useState([])
   const [sent,setSent]         = useState([])
   const [unread,setUnread]     = useState([])
-  const [read,setRead]            = useState([])
+  const [read,setRead]         = useState([])
+  const [spam,setSpam]         = useState([])
+  const [color,setColor]       = useState(null)
+
 
   const [progress,setProgress]                 = useState(0)
   const [onFetching,setOnFetching]             = useState(false)
@@ -34,14 +50,17 @@ function App() {
   const refreshInbox=async ()=>{
 
     setOnFetching(true)
-    ref.current.continuousStart()
+    ref.current?.continuousStart()
 
     fetchInboxSender().then((v)=>{
       setInbox(v)
       setOnFetching(false)
-      ref.current.complete()
+      ref.current?.complete()
+    }).catch((e)=>{
+      setInbox([])
     })
   }
+
 
   const refreshTrash=async ()=>{
 
@@ -91,13 +110,27 @@ function App() {
     })
   }
 
+  const refreshSpam=async ()=>{
+
+    ref.current.continuousStart()
+
+    fetchSpamSender().then((v)=>{
+      setSpam(v)
+      ref.current.complete()
+    })
+  }
+
+
+
 
   useEffect(()=>{
     refreshInbox()
+    setColor(generateColorFromAddress(user.toString()))
   },[])
 
   return (
     <div className="App">
+      <Signature/>
       <LoadingBar  progress={progress} color='#0b57d0' onLoaderFinished={() => setProgress(0)} ref={ref}/>
       <Toaster 
         position='bottom-left'
@@ -126,6 +159,7 @@ function App() {
             refreshSent  = {refreshSent}
             refreshUnread= {refreshUnread}
             refreshRead  = {refreshRead}
+            refreshSpam  = {refreshSpam}
 
             /**Loading bar contoller */
             LoaderRef    = {ref} 
@@ -136,7 +170,8 @@ function App() {
             sent         = {sent}
             unread       = {unread}
             read         = {read}
-
+            color        = {color}
+            spam         = {spam}
             /**data setter*/
             setTrash     = {setTrash}
             setSent      = {setSent}
