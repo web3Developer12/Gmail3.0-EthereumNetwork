@@ -11,6 +11,6 @@ export default function Signature(){
         >
 
         </motion.div>
-        <motion.p className='mediumSans'>Signing the transaction in the blockchain...</motion.p>
+        <motion.p className='mediumSans'>Confirming the transaction ...</motion.p>
     </div>
 }

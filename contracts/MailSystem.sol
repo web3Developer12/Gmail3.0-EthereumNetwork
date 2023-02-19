@@ -1,214 +1,230 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import "hardhat/console.sol";
 
-contract MailSystem{
+contract MailSystem {
 
-    struct Mail{
+    struct Mail {
 
         address _from;
         address _to;
         string  _subject;
         string  _markdown;
         uint256 _timeStamp;
-        bool    _read;
+        uint256 _index  ;
 
-        bool    _onInbox;
-        bool    _onStarred;
-        bool    _onTrashed;
-    }
-
-    struct Mails{
-        Mail[] _inbox;
-        Mail[] _starred;
-        Mail[] _sent;
-        Mail[] _allMail;
-        Mail[] _untrusted;
-        Mail[] _trash;
-        Mail[] _archive;
-        Mail[] _read;
-        Mail[] _unRead;
-
+        bool    _inbox  ;
+        bool    _starred;
+        bool    _archive;
+        bool    _sent   ;
+        bool    _read   ;
+        bool    _unread ;
+        bool    _spam   ;
+        bool    _trash  ;
 
     }
 
-    mapping(address => Mails) users;
+    mapping(address => Mail[]) mails;
     mapping(address => uint256) uid;
     mapping(address => bool)   scam;
+    uint256 global_index  = 0;
 
     function compose(
         address _to,string calldata _subject,string calldata _markdown
     )external{
-        Mail memory _newMail = Mail(msg.sender,_to,_subject,_markdown,block.number,false,false,false,false);
-        users[msg.sender]._sent.push(_newMail);
-        users[_to]._inbox.push(_newMail);
+        Mail memory _newMail = Mail(
+            msg.sender,_to,_subject,_markdown,block.number,global_index,false,false,false,false,false,false,false,false
+        );
+        _newMail._inbox = true;
+        mails[_to].push(_newMail);
+
+        _newMail._inbox = false;
+        _newMail._sent  = true;
+        global_index ++;
+        _newMail._index = global_index;
+        mails[msg.sender].push(_newMail);
+        global_index++;
+
     }
 
-    function move(uint256 origin,uint destination,uint256[] memory _indexes) external{
-        require(_indexes.length >= 1,"DATA NOT FOUND");
-        for(uint256 i=0;i<_indexes.length;i++){
-
-            uint256 _mailIndex = _indexes[i];
-            /*origin destination STAND FOR THE ORIGIN OF THE MOVE =======> MANAGEMENT*/
-            if              (origin == 0){
-                /*origin destination:0 => INBOX*/
-                if     (destination == 1){
-                    /*MOVE EMAIL INBOX TO STARRED*/
-                    users[msg.sender]._starred.push(users[msg.sender]._inbox[_mailIndex]);
-                    users[msg.sender]._inbox[_mailIndex]._onStarred = true;
-                }
-                else if(destination == 2){
-                    /*MOVE EMAIL INBOX TO SPAM*/
-                    users[msg.sender]._untrusted.push(users[msg.sender]._inbox[_mailIndex]);
-                }
-                else if(destination == 3){
-                    /*MOVE EMAIL INBOX TO TRASH*/
-                    users[msg.sender]._trash.push(users[msg.sender]._inbox[_mailIndex]);
-                }
-                else if(destination == 4){
-                    /*MOVE EMAIL INBOX TO ARCHIVE*/
-                    users[msg.sender]._archive.push(users[msg.sender]._inbox[_mailIndex]);
-                }
-            }
-            else if         (origin == 1){
-                /*origin destination:1 => ARCHIVE*/
-                if     (destination == 1){
-                    /*MOVE EMAIL ARCHIVE TO STARRED*/
-                    users[msg.sender]._starred.push(users[msg.sender]._archive[_mailIndex]);
-                }
-                else if(destination == 2){
-                    /*MOVE EMAIL ARCHIVE TO SPAM*/
-                    users[msg.sender]._untrusted.push(users[msg.sender]._archive[_mailIndex]);
-                }
-                else if(destination == 3){
-                    /*MOVE EMAIL ARCHIVE TO TRASH*/
-                    users[msg.sender]._trash.push(users[msg.sender]._archive[_mailIndex]);
-                }
-                else if(destination == 4){
-                    /*MOVE EMAIL ARCHIVE TO INBOX*/
-                    users[msg.sender]._inbox.push(users[msg.sender]._archive[_mailIndex]);
-                }
-            }
-            else if(origin == 2){
-                /*origin destination:2 => TRASH*/
-                if     (destination == 1){
-                    /*MOVE EMAIL TRASH TO STARRED*/
-                    users[msg.sender]._starred.push(users[msg.sender]._trash[_mailIndex]);
-                    users[msg.sender]._trash[_mailIndex]._onStarred = true;
-
-                }
-                else if(destination == 2){
-                    /*MOVE EMAIL TRASH TO SPAM*/
-                    users[msg.sender]._untrusted.push(users[msg.sender]._trash[_mailIndex]);
-                }
-                else if(destination == 3){
-                    /*MOVE EMAIL TRASH TO ARCHIVE*/
-                    users[msg.sender]._archive.push(users[msg.sender]._trash[_mailIndex]);
-                }
-                else if(destination == 4){
-                    /*MOVE EMAIL TRASH TO INBOX*/
-                    users[msg.sender]._inbox.push(users[msg.sender]._trash[_mailIndex]);
-                }
-            }
-            else if(origin == 3){
-                /*origin destination:3 => REPORTED*/
-                users[msg.sender]._untrusted.push(users[msg.sender]._inbox[_mailIndex]);
-                if     (destination == 1){
-                    /*MOVE EMAIL SPAM TO STARRED*/
-                    users[msg.sender]._starred.push(users[msg.sender]._untrusted[_mailIndex]);
-                    users[msg.sender]._untrusted[_mailIndex]._onStarred = true;
-
-                }
-                else if(destination == 2){
-                    /*MOVE EMAIL SPAM TO ARCHIVE*/
-                    users[msg.sender]._archive.push(users[msg.sender]._untrusted[_mailIndex]);
-                }
-                else if(destination == 4){
-                    /*MOVE EMAIL SPAM TO INBOX*/
-                    users[msg.sender]._inbox.push(users[msg.sender]._untrusted[_mailIndex]);
-                }
-            }
-            else if(origin == 4){
-                /*origin destination:4 => STARRED*/
-                users[msg.sender]._starred.push(users[msg.sender]._inbox[_mailIndex]);
-            }
-            else if(origin == 5){
-                /*origin destination:5 => READ*/
-                users[msg.sender]._read.push(users[msg.sender]._inbox[_mailIndex]);
-            }
-            else if(origin == 6){
-                /*origin destination:5 => UNREAD*/
-                users[msg.sender]._unRead.push(users[msg.sender]._inbox[_mailIndex]);
-            }
-
-            /*destination STAND FOR THE ORIGIN OF THE MAIL TO DELETE =======> MANAGEMENT*/
-            if    (origin == 0){
-                /*REMOVE MAIL FROM INBOX*/
-                uint256 size  = users[msg.sender]._inbox.length;
-                users[msg.sender]._inbox[_mailIndex] = users[msg.sender]._inbox[size-1];
-                users[msg.sender]._inbox.pop();
-            }
-            else if(origin == 1){
-                /*REMOVE MAIL FROM STARRED*/
-                uint256 size  = users[msg.sender]._starred.length;
-                users[msg.sender]._starred[_mailIndex] = users[msg.sender]._starred[size-1];
-                users[msg.sender]._starred.pop();
-            }
-            else if(origin == 2){
-                /*REMOVE MAIL FROM SENT*/
-                uint256 size  = users[msg.sender]._sent.length;
-                users[msg.sender]._sent[_mailIndex] = users[msg.sender]._sent[size-1];
-                users[msg.sender]._sent.pop();
-            } 
-            else if(origin == 3){
-                /*REMOVE MAIL FROM UNTRUSTED*/
-                uint256 size  = users[msg.sender]._untrusted.length;
-                users[msg.sender]._untrusted[_mailIndex] = users[msg.sender]._untrusted[size-1];
-                users[msg.sender]._untrusted.pop();
-            }  
-            else if(origin == 4){
-                /*REMOVE MAIL FROM TRASH*/
-                uint256 size  = users[msg.sender]._trash.length;
-                users[msg.sender]._trash[_mailIndex] = users[msg.sender]._trash[size-1];
-                users[msg.sender]._trash.pop();
-            }  
-            else if(origin == 5){
-                /*REMOVE MAIL FROM READ*/
-                uint256 size  = users[msg.sender]._read.length;
-                users[msg.sender]._read[_mailIndex] = users[msg.sender]._read[size-1];
-                users[msg.sender]._read.pop();
-            }  
-            else if(origin == 6){
-                /*REMOVE MAIL FROM UNREAD*/
-                uint256 size  = users[msg.sender]._unRead.length;
-                users[msg.sender]._unRead[_mailIndex] = users[msg.sender]._unRead[size-1];
-                users[msg.sender]._unRead.pop();
-            }  
-        }
+    function move(string calldata _origin,string calldata _to,uint256[] memory _indexes) external {
         
-    }
+        if(keccak256(abi.encodePacked(_origin)) == keccak256(abi.encodePacked("INBOX"))){
+            
+            if(keccak256(abi.encodePacked(_to)) == keccak256(abi.encodePacked("STAR"))){
+                uint256 size = _indexes.length;
+                for(uint256 i=0;i<size;i++){
+                    uint position = _indexes[i];
+                    console.log("position",position,"starred",mails[msg.sender][position]._starred);
+                    mails[msg.sender][position]._starred = true;
+                    console.log("position",position,"starred",mails[msg.sender][position]._starred);
+                }
 
-    function mark(uint256 origin,uint256 to,uint256[] memory indexes) external{
-        /*Mark mail as star,read,unread*/
-    } 
+            }
+            else if(keccak256(abi.encodePacked(_to)) == keccak256(abi.encodePacked("ARCHIVE"))){
+                uint256 size = _indexes.length;
+                for(uint256 i=0;i<size;++i){
+                    uint index = _indexes[i];
+                    mails[msg.sender][index]._inbox   = false;
+                    mails[msg.sender][index]._archive = true;
+                }
+            }
+            else if(keccak256(abi.encodePacked(_to)) == keccak256(abi.encodePacked("SPAM"))){
+                uint256 size = _indexes.length;
+                for(uint256 i=0;i<size;++i){
+                    uint index = _indexes[i];
+                    mails[msg.sender][index]._inbox   = false;
+                    mails[msg.sender][index]._spam    = true;
+                }
+            }
+            else if(keccak256(abi.encodePacked(_to)) == keccak256(abi.encodePacked("READ"))){
+                uint256 size = _indexes.length;
+                for(uint256 i=0;i<size;++i){
+                    uint index = _indexes[i];
+                    mails[msg.sender][index]._inbox   = true;
+                    mails[msg.sender][index]._read    = true;
+                    mails[msg.sender][index]._unread  = false;
+
+                }
+            }
+            else if(keccak256(abi.encodePacked(_to)) == keccak256(abi.encodePacked("UNREAD"))){
+                uint256 size = _indexes.length;
+                for(uint256 i=0;i<size;++i){
+                    uint index = _indexes[i];
+                    mails[msg.sender][index]._inbox   = true;
+                    mails[msg.sender][index]._unread  = false;
+                    mails[msg.sender][index]._read    = true;
+
+                }
+            }
+            else if(keccak256(abi.encodePacked(_to)) == keccak256(abi.encodePacked("TRASH"))){
+                uint256 size = _indexes.length;
+                for(uint256 i=0;i<size;++i){
+                    uint index = _indexes[i];
+                    mails[msg.sender][index]._inbox   = false;
+                    mails[msg.sender][index]._trash   = true;
+
+                }
+            }
+            
+        }
+    }
 
     function inbox() external view returns(Mail[] memory){
-        return users[msg.sender]._inbox;
+        
+        Mail[] storage _mails = mails[msg.sender];
+        uint size = _mails.length;
+        uint validSize = 0;
+
+        // Count the number of valid elements
+        for (uint i = 0; i < size; i++) {
+            if (_mails[i]._inbox && _mails[i]._timeStamp != 0) {
+                validSize++;
+            }
+        }
+
+        Mail[] memory data = new Mail[](validSize);
+
+        // Add only the valid elements to the data array
+        uint j = 0;
+        for (uint i = 0; i < size; i++) {
+            if (_mails[i]._inbox && _mails[i]._timeStamp != 0) {
+                data[j] = _mails[i];
+                j++;
+            }
+        }
+
+        return data;
     }
-    function trash() external view returns(Mail[] memory){
-        return users[msg.sender]._trash;
-    }
-    function starred() external view returns(Mail[] memory){
-        return users[msg.sender]._starred;
-    }
-    function spam() external view returns(Mail[] memory){
-        return users[msg.sender]._untrusted;
-    }
+
     function sent() external view returns(Mail[] memory){
-        return users[msg.sender]._sent;
+        
+        Mail[] storage _mails = mails[msg.sender];
+        uint size = _mails.length;
+        uint validSize = 0;
+
+        // Count the number of valid elements
+        for (uint i = 0; i < size; i++) {
+            if (_mails[i]._sent && _mails[i]._timeStamp != 0) {
+                validSize++;
+            }
+        }
+
+        Mail[] memory data = new Mail[](validSize);
+
+        // Add only the valid elements to the data array
+        uint j = 0;
+        for (uint i = 0; i < size; i++) {
+            if (_mails[i]._sent && _mails[i]._timeStamp != 0) {
+                data[j] = _mails[i];
+                j++;
+            }
+        }
+
+        return data;
     }
+
     function archive() external view returns(Mail[] memory){
-        return users[msg.sender]._archive;
+        
+        Mail[] storage _mails = mails[msg.sender];
+        uint size = _mails.length;
+        uint validSize = 0;
+
+        // Count the number of valid elements
+        for (uint i = 0; i < size; i++) {
+            if (_mails[i]._archive && _mails[i]._timeStamp != 0) {
+                validSize++;
+            }
+        }
+
+        Mail[] memory data = new Mail[](validSize);
+
+        // Add only the valid elements to the data array
+        uint j = 0;
+        for (uint i = 0; i < size; i++) {
+            if (_mails[i]._archive && _mails[i]._timeStamp != 0) {
+                data[j] = _mails[i];
+                j++;
+            }
+        }
+
+        return data;
     }
+
+    function star() external view returns(Mail[] memory){
+        
+        Mail[] storage _mails = mails[msg.sender];
+        uint size = _mails.length;
+        uint validSize = 0;
+
+        // Count the number of valid elements
+        for (uint i = 0; i < size; i++) {
+            if (_mails[i]._starred && _mails[i]._timeStamp != 0) {
+                validSize++;
+            }
+        }
+
+        Mail[] memory data = new Mail[](validSize);
+
+        // Add only the valid elements to the data array
+        uint j = 0;
+        for (uint i = 0; i < size; i++) {
+            if (_mails[i]._starred && _mails[i]._timeStamp != 0) {
+                data[j] = _mails[i];
+                j++;
+            }
+        }
+
+        return data;
+    }
+
+    function chain() external view returns(Mail[] memory){
+        return mails[msg.sender];
+    }
+    
+
+
+   
    
 }

@@ -29,25 +29,25 @@ function TabContentInbox(props){
                     exit       =  {{ x:-100,opacity:0}}
                     transition =  {{ delay:index * 0.06}}
                     key        =  {index}
-                    className={`mail-data ${props.selectionId.includes(index)?"mail-data-selected":""}`}
+                    className={`mail-data ${props.selectionId.includes(e.index)?"mail-data-selected":""}`}
                 >
                     <div className='mail-data-start'>
                         <span className="material-symbols-outlined" style={props.onSelect ? {color:"black"}:{color:"rgba(63, 63, 63, 0.342)"}} onClick={()=>{
                             props.setOnSelect(true)
-                            props.setSelectionId([...props.selectionId,index])
+                            props.setSelectionId([...props.selectionId,e.index])
                             if(props.onSelect){
-                                if(props.selectionId.includes(index)){
+                                if(props.selectionId.includes(e.index)){
                                     const newArray=props.selectionId.filter(function(item) {
-                                        return item !== index
+                                        return item !== e.index
                                     })
                                     props.setSelectionId(newArray)
                                 }else{
-                                    props.setSelectionId([...props.selectionId,index])
+                                    props.setSelectionId([...props.selectionId,e.index])
                                 }
                             }
                             
                         }}>
-                            {props.selectionId.includes(index)?"check_box":"check_box_outline_blank"}
+                            {props.selectionId.includes(e.index)?"check_box":"check_box_outline_blank"}
                         </span>
                         <span onClick={()=>{
                             if(props.onSelect == false){
@@ -55,7 +55,7 @@ function TabContentInbox(props){
                             }
 
 
-                        }} className="material-symbols-outlined" style={{color:props.starredId.includes(index)&&"#f4b400"}}>star</span>
+                        }} className="material-symbols-outlined" style={{color:e.starred&&"#f4b400"}}>star</span>
                         <p className='boldSans'>{e.subject} </p>
                     </div>
                     <p className='mediumRegular mark'>
@@ -72,13 +72,12 @@ function TabContentInbox(props){
 }
 function TabContentGeneral(props){
 
-    const [data,setData] = useState([])
     
     const tabContentController = {
         "trash":props.trash,
         "sent" :props.sent,
         "starred":[],
-        "draft":[],
+        "archive":props.archive,
         "spam":props.spam,
         "mails":[],
         "unread":props.unread,
@@ -92,7 +91,7 @@ function TabContentGeneral(props){
         }else if(props.indexGeneral == 2){
             return "sent"
         }else if(props.indexGeneral== 3){
-            return "draft"
+            return "archive"
         }
         else if(props.indexGeneral == 4){
             return "spam"
@@ -114,6 +113,7 @@ function TabContentGeneral(props){
     }
 
     useEffect(()=>{
+        props.setSelectionId([])
         if(props.indexGeneral == 2){
             props.refreshSent()
         }else if(props.indexGeneral == 8){
@@ -125,6 +125,9 @@ function TabContentGeneral(props){
             props.refreshRead()
         }else if(props.indexGeneral == 4){
             props.refreshSpam()
+        }
+        else if(props.indexGeneral == 3){
+            props.refreshArchive()
         }
     },[props.indexGeneral])
 
@@ -142,10 +145,26 @@ function TabContentGeneral(props){
                     animate    =  {{ x: 0  ,opacity:1 }}
                     exit       =  {{ x:-100,opacity:0}}
                     transition =  {{ delay:index * 0.06}}
-                    className='mail-data'
+                    className={`mail-data ${props.selectionId.includes(index)?"mail-data-selected":""}`}
                 >
                     <div className='mail-data-start'>
-                        <span className="material-symbols-outlined">check_box_outline_blank</span>
+                    <span className="material-symbols-outlined" style={props.onSelect ? {color:"black"}:{color:"rgba(63, 63, 63, 0.342)"}} onClick={()=>{
+                            props.setOnSelect(true)
+                            props.setSelectionId([...props.selectionId,index])
+                            if(props.onSelect){
+                                if(props.selectionId.includes(index)){
+                                    const newArray=props.selectionId.filter(function(item) {
+                                        return item !== index
+                                    })
+                                    props.setSelectionId(newArray)
+                                }else{
+                                    props.setSelectionId([...props.selectionId,index])
+                                }
+                            }
+                            
+                        }}>
+                            {props.selectionId.includes(index)?"check_box":"check_box_outline_blank"}
+                        </span>
                         <span className="material-symbols-outlined">star</span>
                         <p className='boldSans'>{e.subject} </p>
                     </div>
@@ -360,9 +379,9 @@ export default function Home(props){
                         }
                     </li>
                     <li onClick={()=>setIndex(3)} className={index == 3 ?"active":""}>
-                        <span className="material-symbols-outlined">draft</span>
+                        <span className="material-symbols-outlined">archive</span>
 
-                        <span className='mediumRegular'>Draft</span>
+                        <span className='mediumRegular'>Archive</span>
                     </li>
                     <li onClick={()=>setIndex(4)} className={index == 4 ?"active":""}>
                     <span className="material-symbols-outlined">report</span>
@@ -466,7 +485,7 @@ export default function Home(props){
                                         onSelect && <>
                                         <span className="material-symbols-outlined" onClick={()=>{
                                             setBulkFlag('archive-flag')
-                                            setStarredId([...selectionId])
+                                            
                                         }}
                                         style={{
                                             color:bulkFlag == 'archive-flag'?"#0b57d0":"gray"
@@ -478,7 +497,6 @@ export default function Home(props){
                                         
                                         onClick={()=>{
                                             setBulkFlag('star-flag')
-                                            setStarredId([...selectionId])
                                         }}
                                         className="material-symbols-outlined">star</span>
 
@@ -487,7 +505,6 @@ export default function Home(props){
                                         }} 
                                         onClick={()=>{
                                             setBulkFlag('spam-flag')
-                                            setStarredId([...selectionId])
 
                                         }}className="material-symbols-outlined">report</span>
 
@@ -499,7 +516,6 @@ export default function Home(props){
                                         }} 
                                         onClick={()=>{
                                             setBulkFlag('trash-flag')
-                                            setStarredId([...selectionId])
                                         }}
                                         className="material-symbols-outlined">delete</span>
                                         </>
@@ -518,18 +534,49 @@ export default function Home(props){
                             </div>
                             {
                                 onSelect &&  <button onClick={async ()=>{
-                                            alert(`Move from ${index}`)
-                                            if(index == 0 && bulkFlag == "trash-flag"){
-                                                await BulkAction(0,3,selectionId).wait()
-                                                setOnSelect(false)
-                                                props.refreshInbox()
+                                    
+                                    if(index == 0 && bulkFlag == "star-flag"){
+                                        await BulkAction("INBOX","STAR",selectionId.sort(),props.setOnSign,props.LoaderRef,setSelectionId)
+                                        props.refreshInbox()
+                                        setOnSelect(false)
+                                    }
+                                    else if(index == 0 && bulkFlag == "trash-flag"){
+                                        await BulkAction(0,3,selectionId,props.setOnSign,props.LoaderRef,setSelectionId)
+                                        console.log('Bulk finished')
+                                        props.refreshInbox()
+                                        setOnSelect(false)
 
 
-                                            }else if(index == 0 && bulkFlag == "spam-flag"){
-                                                await BulkAction(0,2,selectionId).wait()
-                                                props.refreshInbox()
-                                            }
-                                            setOnSelect(false)
+                                    }else if(index == 0 && bulkFlag == "spam-flag"){
+                                        await BulkAction(0,2,selectionId,props.setOnSign,props.LoaderRef,setSelectionId)
+                                        props.refreshInbox()
+                                        setOnSelect(false)
+
+                                    }else if(index == 0 && bulkFlag == "archive-flag"){
+                                        await BulkAction(0,4,selectionId,props.setOnSign,props.LoaderRef,setSelectionId)
+                                        setOnSelect(false)
+                                    }
+
+                                    if(index == 2 && bulkFlag == "spam-flag"){
+                                        toast("Cannot report your own email sent")
+                                    }
+                                    else if(index == 2 && bulkFlag == "archive-flag"){
+                                        toast("Cannot archive your own email sent")
+                                    }
+                                    else if(index == 2 && bulkFlag == "trash-flag"){
+                                        toast("Move from sent to trash")
+                                    }
+                                    
+                                    if(index == 3 && bulkFlag == "spam-flag"){
+                                        await BulkAction(1,2,selectionId,props.setOnSign,props.LoaderRef,setSelectionId)
+
+                                    }
+                                    else if(index == 3 && bulkFlag == "archive-flag"){
+                                        toast("Disabled")
+                                    }
+                                    else if(index == 3 && bulkFlag == "trash-flag"){
+                                        toast("Move from sent to trash")
+                                    }
 
                                 }} className={`bulk mediumSans ${selectionId.length == 0?'bulk-inactive':''}`}>
                                 <span className="material-symbols-outlined">fingerprint</span>
@@ -632,6 +679,9 @@ export default function Home(props){
 
                             spam            = {props.spam}
                             refreshSpam     = {props.refreshSpam}
+
+                            archive          = {props.archive}
+                            refreshArchive   = {props.refreshArchive}
 
 
                         />

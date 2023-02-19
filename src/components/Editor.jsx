@@ -35,7 +35,7 @@ export default function Editor(props){
         </div>
 
         <div className='destination'>
-            <div className='inputEditor'>
+            <div className='inputEditor mediumRegular'>
                 <p className='mediumRegular'>To</p>
                 <input value={to} onChange={(e)=>setTo(e.target.value)} className='input1' type="text" placeholder="0x0000000000000000000000000000000000000000"/>
             </div>
@@ -56,7 +56,7 @@ export default function Editor(props){
                                 props.setIsOpen(false);
                                 await ComposeMail(to,subject,body)
                                 props.LoaderRef.current.complete()
-                                props.refreshInbox()
+                                await props.refreshInbox()
                                 toast("Message sent")
 
 

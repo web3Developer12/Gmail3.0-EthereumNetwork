@@ -7,7 +7,7 @@ import Loader from './components/Loader'
 import Home from './components/Home'
 import { getAuthorizedAccounts } from './utils/wallet'
 import { useEffect,useRef } from 'react'
-import { ComposeMail, fetchInboxSender, fetchReadSender, fetchSentSender, fetchSpamSender, fetchTrashSender, fetchUnreadSender } from './utils/contract'
+import { ComposeMail, fetchArchiveSender, fetchInboxSender, fetchReadSender, fetchSentSender, fetchSpamSender, fetchTrashSender, fetchUnreadSender } from './utils/contract'
 import LoadingBar from 'react-top-loading-bar'
 import toast, { Toaster } from 'react-hot-toast';
 import Web3 from 'web3'
@@ -33,9 +33,11 @@ function App() {
   const [unread,setUnread]     = useState([])
   const [read,setRead]         = useState([])
   const [spam,setSpam]         = useState([])
+  const [archive,setArchive]   = useState([])
+
   const [color,setColor]       = useState(null)
 
-
+  const [onSign,setOnSign]     = useState(false)
   const [progress,setProgress]                 = useState(0)
   const [onFetching,setOnFetching]             = useState(false)
   const [onFetchingTrash,setOnFetchingTrash]   = useState(false)
@@ -53,7 +55,7 @@ function App() {
     ref.current?.continuousStart()
 
     fetchInboxSender().then((v)=>{
-      setInbox(v)
+      if(v!= undefined){setInbox(v)}
       setOnFetching(false)
       ref.current?.complete()
     }).catch((e)=>{
@@ -120,17 +122,28 @@ function App() {
     })
   }
 
+  const refreshArchive=async ()=>{
+
+    ref.current.continuousStart()
+
+    fetchArchiveSender().then((v)=>{
+      setArchive(v)
+      console.log(v)
+      ref.current.complete()
+    })
+  }
+
+
 
 
 
   useEffect(()=>{
     refreshInbox()
-    setColor(generateColorFromAddress(user.toString()))
   },[])
 
   return (
     <div className="App">
-      <Signature/>
+      {onSign && <Signature/>}
       <LoadingBar  progress={progress} color='#0b57d0' onLoaderFinished={() => setProgress(0)} ref={ref}/>
       <Toaster 
         position='bottom-left'
@@ -154,13 +167,13 @@ function App() {
             onFetching      = {onFetching} 
             OnFetchingTrash = {onFetchingTrash}
             /**refresher */
-            refreshInbox = {refreshInbox} 
-            refreshTrash = {refreshTrash}
-            refreshSent  = {refreshSent}
-            refreshUnread= {refreshUnread}
-            refreshRead  = {refreshRead}
-            refreshSpam  = {refreshSpam}
-
+            refreshInbox   = {refreshInbox} 
+            refreshTrash   = {refreshTrash}
+            refreshSent    = {refreshSent}
+            refreshUnread  = {refreshUnread}
+            refreshRead    = {refreshRead}
+            refreshSpam    = {refreshSpam}
+            refreshArchive = {refreshArchive}
             /**Loading bar contoller */
             LoaderRef    = {ref} 
             /**data getter*/
@@ -172,9 +185,12 @@ function App() {
             read         = {read}
             color        = {color}
             spam         = {spam}
+            archive      = {archive}
+            onSign       = {onSign}
             /**data setter*/
             setTrash     = {setTrash}
             setSent      = {setSent}
+            setOnSign    = {setOnSign}
 
           />
           }/>
