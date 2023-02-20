@@ -211,6 +211,7 @@ ul li span:nth-child(1){
     display:flex;
     align-items:center;
     justify-content:flex-start;
+
 }
 .header-tools-row span{
     font-size:21px;
@@ -227,6 +228,7 @@ ul li span:nth-child(1){
     display:flex;
     align-items:center;
     justify-content:flex-end;
+    
 }
 .tab-details span{
     font-size:21px;
@@ -243,6 +245,7 @@ ul li span:nth-child(1){
     display:grid;
     grid-template-columns:repeat(3,25%);
     grid-column-gap:1%;
+
 }
 .tab-element{
     border:none;

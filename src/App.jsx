@@ -7,7 +7,7 @@ import Loader from './components/Loader'
 import Home from './components/Home'
 import { getAuthorizedAccounts } from './utils/wallet'
 import { useEffect,useRef } from 'react'
-import { ComposeMail, fetchArchiveSender, fetchInboxSender, fetchReadSender, fetchSentSender, fetchSpamSender, fetchTrashSender, fetchUnreadSender } from './utils/contract'
+import { ComposeMail, fetchArchiveSender, fetchInboxSender, fetchReadSender, fetchSentSender, fetchSpamSender, fetchStarredSender, fetchTrashSender, fetchUnreadSender } from './utils/contract'
 import LoadingBar from 'react-top-loading-bar'
 import toast, { Toaster } from 'react-hot-toast';
 import Web3 from 'web3'
@@ -34,6 +34,8 @@ function App() {
   const [read,setRead]         = useState([])
   const [spam,setSpam]         = useState([])
   const [archive,setArchive]   = useState([])
+  const [star,setStar]   = useState([])
+
 
   const [color,setColor]       = useState(null)
 
@@ -133,6 +135,17 @@ function App() {
     })
   }
 
+  const refreshStar=async ()=>{
+
+    ref.current.continuousStart()
+
+    fetchStarredSender().then((v)=>{
+      setStar(v)
+      ref.current.complete()
+    })
+  }
+
+
 
 
 
@@ -174,6 +187,7 @@ function App() {
             refreshRead    = {refreshRead}
             refreshSpam    = {refreshSpam}
             refreshArchive = {refreshArchive}
+            refreshStar    = {refreshStar}
             /**Loading bar contoller */
             LoaderRef    = {ref} 
             /**data getter*/
@@ -187,6 +201,7 @@ function App() {
             spam         = {spam}
             archive      = {archive}
             onSign       = {onSign}
+            star         = {star}
             /**data setter*/
             setTrash     = {setTrash}
             setSent      = {setSent}

@@ -56,9 +56,9 @@ function TabContentInbox(props){
 
 
                         }} className="material-symbols-outlined" style={{color:e.starred&&"#f4b400"}}>star</span>
-                        <p className='boldSans'>{e.subject} </p>
+                        <p className='boldSans' style={{color:e.read && "gray"}}>{e.subject} </p>
                     </div>
-                    <p className='mediumRegular mark'>
+                    <p className='mediumRegular mark' style={{color:e.read && "gray"}}>
                         <span className='boldSans'>{e.markdown.substring(0,23)}</span> - <span className='opp'>{e.markdown.slice(-56)}...</span>
                     </p>
                     <p className='mediumSans hour'>{new Date(e.timeStamp).toLocaleTimeString()}</p>
@@ -76,10 +76,9 @@ function TabContentGeneral(props){
     const tabContentController = {
         "trash":props.trash,
         "sent" :props.sent,
-        "starred":[],
+        "starred":props.star,
         "archive":props.archive,
         "spam":props.spam,
-        "mails":[],
         "unread":props.unread,
         "read":props.read,
 
@@ -95,9 +94,6 @@ function TabContentGeneral(props){
         }
         else if(props.indexGeneral == 4){
             return "spam"
-        }
-        else if(props.indexGeneral == 5){
-            return "mails"
         }
         else if(props.indexGeneral == 6){
             return "unread"
@@ -128,6 +124,16 @@ function TabContentGeneral(props){
         }
         else if(props.indexGeneral == 3){
             props.refreshArchive()
+            console.log(props.archive)
+        }
+        else if(props.indexGeneral == 1){
+            props.refreshStar()
+        }
+        else if(props.indexGeneral == 5){
+            props.refreshInbox()
+            props.refreshSent()
+            props.refreshArchive()
+            props.refreshStar()
         }
     },[props.indexGeneral])
 
@@ -145,27 +151,37 @@ function TabContentGeneral(props){
                     animate    =  {{ x: 0  ,opacity:1 }}
                     exit       =  {{ x:-100,opacity:0}}
                     transition =  {{ delay:index * 0.06}}
-                    className={`mail-data ${props.selectionId.includes(index)?"mail-data-selected":""}`}
+                    className={`mail-data ${props.selectionId.includes(e.index)?"mail-data-selected":""}`}
                 >
                     <div className='mail-data-start'>
+                   
                     <span className="material-symbols-outlined" style={props.onSelect ? {color:"black"}:{color:"rgba(63, 63, 63, 0.342)"}} onClick={()=>{
                             props.setOnSelect(true)
-                            props.setSelectionId([...props.selectionId,index])
+                            props.setSelectionId([...props.selectionId,e.index])
                             if(props.onSelect){
-                                if(props.selectionId.includes(index)){
+                                if(props.selectionId.includes(e.index)){
                                     const newArray=props.selectionId.filter(function(item) {
-                                        return item !== index
+                                        return item !== e.index
                                     })
                                     props.setSelectionId(newArray)
                                 }else{
-                                    props.setSelectionId([...props.selectionId,index])
+                                    props.setSelectionId([...props.selectionId,e.index])
                                 }
                             }
                             
                         }}>
-                            {props.selectionId.includes(index)?"check_box":"check_box_outline_blank"}
-                        </span>
-                        <span className="material-symbols-outlined">star</span>
+                            {props.selectionId.includes(e.index)?"check_box":"check_box_outline_blank"}
+                    </span>
+                    {
+                        e._spam == false ?
+                    
+                        <span onClick={()=>{
+
+                        }} className="material-symbols-outlined" style={{color:e.starred&&"#f4b400"}}>
+                            star
+                        </span> :<span className="material-symbols-outlined" style={{color:"#d50000"}}>report</span>
+                    }
+
                         <p className='boldSans'>{e.subject} </p>
                     </div>
                     <p className='mediumRegular mark'>
@@ -359,6 +375,19 @@ export default function Home(props){
                     <li onClick={()=>setIndex(1)} className={index == 1 ?"active":""}>
                         <span className="material-symbols-outlined">star</span>
                         <span className='mediumRegular'>Starred</span>
+                        {
+                            index == 1  &&  
+                            <motion.span 
+                                initial    =  {{ x:-100,opacity:0}}
+                                animate    =  {{ x: 0  ,opacity:1 }}
+                                exit       =  {{ x:-100,opacity:0}}
+                                transition =  {{ delay:index * 0.06}}
+                                className='boldSans inbox-counter'
+                                >
+                                {props.star.length}
+                            </motion.span>
+                        
+                        }
                     </li>
                     <li onClick={()=>setIndex(2)} className={index == 2 ?"active":""}>
                         <span className="material-symbols-outlined">send</span>
@@ -382,16 +411,37 @@ export default function Home(props){
                         <span className="material-symbols-outlined">archive</span>
 
                         <span className='mediumRegular'>Archive</span>
+                        {
+                            index == 3  &&  
+                            <motion.span 
+                                initial    =  {{ x:-100,opacity:0}}
+                                animate    =  {{ x: 0  ,opacity:1 }}
+                                exit       =  {{ x:-100,opacity:0}}
+                                transition =  {{ delay:index * 0.06}}
+                                className='boldSans inbox-counter'
+                                >
+                                {props.archive.length}
+                            </motion.span>
+                        
+                        }
                     </li>
                     <li onClick={()=>setIndex(4)} className={index == 4 ?"active":""}>
                     <span className="material-symbols-outlined">report</span>
                     
                         <span className='mediumRegular'>Spam</span>
-                    </li>
-                    <li onClick={()=>setIndex(5)} className={index == 5 ?"active":""}>
-                    <span className="material-symbols-outlined">mail</span>
-
-                        <span className='mediumRegular'>All Mail</span>
+                        {
+                            index == 4  &&  
+                            <motion.span 
+                                initial    =  {{ x:-100,opacity:0}}
+                                animate    =  {{ x: 0  ,opacity:1 }}
+                                exit       =  {{ x:-100,opacity:0}}
+                                transition =  {{ delay:index * 0.06}}
+                                className='boldSans inbox-counter'
+                                >
+                                {props.spam.length}
+                            </motion.span>
+                        
+                        }
                     </li>
                     <li onClick={()=>setIndex(6)} className={index == 6 ?"active":""}>
                         <span className="material-symbols-outlined">
@@ -508,8 +558,21 @@ export default function Home(props){
 
                                         }}className="material-symbols-outlined">report</span>
 
-                                        <span className="material-symbols-outlined">mark_email_read</span>
-                                        <span className="material-symbols-outlined">mark_email_unread</span>
+                                        <span style={{
+                                            color:bulkFlag == 'unread-flag'?"#0b57d0":"gray"
+                                        }}  onClick={()=>{
+                                            setBulkFlag('unread-flag')
+
+                                        }}className="material-symbols-outlined">mark_email_unread</span>
+
+                                        <span style={{
+                                            color:bulkFlag == 'read-flag'?"#0b57d0":"gray"
+                                        }} 
+                                        onClick={()=>{
+                                            setBulkFlag('read-flag')
+
+                                        }}
+                                        className="material-symbols-outlined">mark_email_read</span>
 
                                         <span style={{
                                             color:bulkFlag == 'trash-flag'?"#0b57d0":"gray"
@@ -535,48 +598,37 @@ export default function Home(props){
                             {
                                 onSelect &&  <button onClick={async ()=>{
                                     
-                                    if(index == 0 && bulkFlag == "star-flag"){
-                                        await BulkAction("INBOX","STAR",selectionId.sort(),props.setOnSign,props.LoaderRef,setSelectionId)
-                                        props.refreshInbox()
+                                    if(bulkFlag == "star-flag"){
+                                        await BulkAction("STAR",selectionId.sort(),props.LoaderRef,setSelectionId)
+                                        props.refreshStar()
                                         setOnSelect(false)
                                     }
-                                    else if(index == 0 && bulkFlag == "trash-flag"){
-                                        await BulkAction(0,3,selectionId,props.setOnSign,props.LoaderRef,setSelectionId)
-                                        console.log('Bulk finished')
-                                        props.refreshInbox()
+                                    else if(bulkFlag == "archive-flag"){
+                                        await BulkAction("ARCHIVE",selectionId.sort(),props.LoaderRef,setSelectionId)
+                                        props.refreshArchive()
                                         setOnSelect(false)
 
-
-                                    }else if(index == 0 && bulkFlag == "spam-flag"){
-                                        await BulkAction(0,2,selectionId,props.setOnSign,props.LoaderRef,setSelectionId)
-                                        props.refreshInbox()
+                                    }else if(bulkFlag == "spam-flag"){
+                                        await BulkAction("SPAM",selectionId.sort(),props.LoaderRef,setSelectionId)
+                                        props.refreshSpam()
                                         setOnSelect(false)
 
-                                    }else if(index == 0 && bulkFlag == "archive-flag"){
-                                        await BulkAction(0,4,selectionId,props.setOnSign,props.LoaderRef,setSelectionId)
+                                    }else if(bulkFlag == "unread-flag"){
+                                        await BulkAction("READ",selectionId.sort(),props.LoaderRef,setSelectionId)
+                                        props.refreshUnread()
+                                        setOnSelect(false)
+                                    }
+                                    else if(bulkFlag == "read-flag"){
+                                        await BulkAction("READ",selectionId.sort(),props.LoaderRef,setSelectionId)
+                                        props.refreshRead()
+                                        setOnSelect(false)
+                                    }
+                                    else if(bulkFlag == "trash-flag"){
+                                        await BulkAction("TRASH",selectionId.sort(),props.LoaderRef,setSelectionId)
+                                        props.refreshTrash()
                                         setOnSelect(false)
                                     }
 
-                                    if(index == 2 && bulkFlag == "spam-flag"){
-                                        toast("Cannot report your own email sent")
-                                    }
-                                    else if(index == 2 && bulkFlag == "archive-flag"){
-                                        toast("Cannot archive your own email sent")
-                                    }
-                                    else if(index == 2 && bulkFlag == "trash-flag"){
-                                        toast("Move from sent to trash")
-                                    }
-                                    
-                                    if(index == 3 && bulkFlag == "spam-flag"){
-                                        await BulkAction(1,2,selectionId,props.setOnSign,props.LoaderRef,setSelectionId)
-
-                                    }
-                                    else if(index == 3 && bulkFlag == "archive-flag"){
-                                        toast("Disabled")
-                                    }
-                                    else if(index == 3 && bulkFlag == "trash-flag"){
-                                        toast("Move from sent to trash")
-                                    }
 
                                 }} className={`bulk mediumSans ${selectionId.length == 0?'bulk-inactive':''}`}>
                                 <span className="material-symbols-outlined">fingerprint</span>
@@ -668,6 +720,7 @@ export default function Home(props){
                             setTrash      = {props.setTrash}
                             onFetchingTrash = {props.onFetchingTrash}
                             refreshSent     = {props.refreshSent} 
+
                             sent            = {props.sent}
                             setSent         = {props.setSent}
 
@@ -682,6 +735,12 @@ export default function Home(props){
 
                             archive          = {props.archive}
                             refreshArchive   = {props.refreshArchive}
+
+                            star             = {props.star}
+                            refreshStar      = {props.refreshStar}
+
+                            inbox            = {props.inbox}
+                            refreshInbox     = {props.refreshInbox}
 
 
                         />

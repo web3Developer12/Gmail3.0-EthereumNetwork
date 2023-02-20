@@ -3,7 +3,7 @@ require("dotenv").config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
-  soldestinationity: "0.8.17",
+  solidity: "0.8.17",
   paths:{
     artifacts:"./src/artifacts"
   },

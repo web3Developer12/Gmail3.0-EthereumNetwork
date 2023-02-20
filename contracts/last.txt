@@ -21,7 +21,6 @@ contract MailSystem {
         bool    _read   ;
         bool    _spam   ;
         bool    _trash  ;
-        bool    _tracked;
 
     }
 
@@ -34,7 +33,7 @@ contract MailSystem {
         address _to,string calldata _subject,string calldata _markdown
     )external{
         Mail memory _newMail = Mail(
-            msg.sender,_to,_subject,_markdown,block.number,global_index,false,false,false,false,false,false,false,false
+            msg.sender,_to,_subject,_markdown,block.number,global_index,false,false,false,false,false,false,false
         );
         _newMail._inbox = true;
         mails[_to].push(_newMail);
@@ -48,8 +47,9 @@ contract MailSystem {
 
     }
 
-    function move(string calldata _to,uint256[] memory _indexes) external {
+    function move(string calldata _origin,string calldata _to,uint256[] memory _indexes) external {
         
+        if(keccak256(abi.encodePacked(_origin)) == keccak256(abi.encodePacked("INBOX"))){
             
             if(keccak256(abi.encodePacked(_to)) == keccak256(abi.encodePacked("STAR"))){
                 uint256 size = _indexes.length;
@@ -64,7 +64,7 @@ contract MailSystem {
                 for(uint256 i=0;i<size;++i){
                     uint index = _indexes[i];
                     mails[msg.sender][index]._inbox   = false;
-                    mails[msg.sender][index]._archive = !mails[msg.sender][index]._archive;
+                    mails[msg.sender][index]._archive = true;
                 }
             }
             else if(keccak256(abi.encodePacked(_to)) == keccak256(abi.encodePacked("SPAM"))){
@@ -72,14 +72,24 @@ contract MailSystem {
                 for(uint256 i=0;i<size;++i){
                     uint index = _indexes[i];
                     mails[msg.sender][index]._inbox   = false;
-                    mails[msg.sender][index]._spam    = !mails[msg.sender][index]._spam;
+                    mails[msg.sender][index]._spam    = true;
                 }
             }
             else if(keccak256(abi.encodePacked(_to)) == keccak256(abi.encodePacked("READ"))){
                 uint256 size = _indexes.length;
                 for(uint256 i=0;i<size;++i){
                     uint index = _indexes[i];
-                    mails[msg.sender][index]._read    = !mails[msg.sender][index]._read;
+                    mails[msg.sender][index]._inbox   = true;
+                    mails[msg.sender][index]._read    = true;
+
+                }
+            }
+            else if(keccak256(abi.encodePacked(_to)) == keccak256(abi.encodePacked("UNREAD"))){
+                uint256 size = _indexes.length;
+                for(uint256 i=0;i<size;++i){
+                    uint index = _indexes[i];
+                    mails[msg.sender][index]._inbox   = true;
+                    mails[msg.sender][index]._read    = false;
 
                 }
             }
@@ -88,16 +98,12 @@ contract MailSystem {
                 for(uint256 i=0;i<size;++i){
                     uint index = _indexes[i];
                     mails[msg.sender][index]._inbox   = false;
+                    mails[msg.sender][index]._trash   = true;
 
-                    if(mails[msg.sender][index]._trash == false){
-                        mails[msg.sender][index]._trash   = true;
-                    }else{
-                        mails[msg.sender][index]._tracked = true;
-                    }
                 }
             }
             
-        
+        }
     }
 
     function inbox() external view returns(Mail[] memory){
@@ -108,7 +114,7 @@ contract MailSystem {
 
         // Count the number of valid elements
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._inbox && _mails[i]._timeStamp != 0 && _mails[i]._tracked == false) {
+            if (_mails[i]._inbox && _mails[i]._timeStamp != 0) {
                 validSize++;
             }
         }
@@ -118,7 +124,7 @@ contract MailSystem {
         // Add only the valid elements to the data array
         uint j = 0;
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._inbox && _mails[i]._timeStamp != 0 && _mails[i]._tracked == false) {
+            if (_mails[i]._inbox && _mails[i]._timeStamp != 0) {
                 data[j] = _mails[i];
                 j++;
             }
@@ -135,7 +141,7 @@ contract MailSystem {
 
         // Count the number of valid elements
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._sent && _mails[i]._timeStamp != 0 && _mails[i]._tracked == false) {
+            if (_mails[i]._sent && _mails[i]._timeStamp != 0) {
                 validSize++;
             }
         }
@@ -145,7 +151,7 @@ contract MailSystem {
         // Add only the valid elements to the data array
         uint j = 0;
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._sent && _mails[i]._timeStamp != 0 && _mails[i]._tracked == false) {
+            if (_mails[i]._sent && _mails[i]._timeStamp != 0) {
                 data[j] = _mails[i];
                 j++;
             }
@@ -162,7 +168,7 @@ contract MailSystem {
 
         // Count the number of valid elements
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._archive && _mails[i]._timeStamp != 0 && _mails[i]._tracked == false) {
+            if (_mails[i]._archive && _mails[i]._timeStamp != 0) {
                 validSize++;
             }
         }
@@ -172,7 +178,7 @@ contract MailSystem {
         // Add only the valid elements to the data array
         uint j = 0;
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._archive && _mails[i]._timeStamp != 0 && _mails[i]._tracked == false) {
+            if (_mails[i]._archive && _mails[i]._timeStamp != 0) {
                 data[j] = _mails[i];
                 j++;
             }
@@ -189,7 +195,7 @@ contract MailSystem {
 
         // Count the number of valid elements
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._starred && _mails[i]._timeStamp != 0 && !_mails[i]._archive && _mails[i]._tracked == false) {
+            if (_mails[i]._starred && _mails[i]._timeStamp != 0) {
                 validSize++;
             }
         }
@@ -199,7 +205,7 @@ contract MailSystem {
         // Add only the valid elements to the data array
         uint j = 0;
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._starred && _mails[i]._timeStamp != 0 && !_mails[i]._archive && _mails[i]._tracked == false) {
+            if (_mails[i]._starred && _mails[i]._timeStamp != 0) {
                 data[j] = _mails[i];
                 j++;
             }
@@ -216,7 +222,7 @@ contract MailSystem {
 
         // Count the number of valid elements
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._spam && _mails[i]._timeStamp != 0 && _mails[i]._tracked == false) {
+            if (_mails[i]._spam && _mails[i]._timeStamp != 0) {
                 validSize++;
             }
         }
@@ -226,7 +232,7 @@ contract MailSystem {
         // Add only the valid elements to the data array
         uint j = 0;
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._spam && _mails[i]._timeStamp != 0 && _mails[i]._tracked == false) {
+            if (_mails[i]._spam && _mails[i]._timeStamp != 0) {
                 data[j] = _mails[i];
                 j++;
             }
@@ -242,7 +248,7 @@ contract MailSystem {
 
         // Count the number of valid elements
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._trash && _mails[i]._timeStamp != 0 && _mails[i]._tracked == false) {
+            if (_mails[i]._trash && _mails[i]._timeStamp != 0) {
                 validSize++;
             }
         }
@@ -252,7 +258,7 @@ contract MailSystem {
         // Add only the valid elements to the data array
         uint j = 0;
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._trash && _mails[i]._timeStamp != 0 && _mails[i]._tracked == false) {
+            if (_mails[i]._trash && _mails[i]._timeStamp != 0) {
                 data[j] = _mails[i];
                 j++;
             }
