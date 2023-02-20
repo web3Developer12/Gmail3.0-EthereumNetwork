@@ -1,5 +1,7 @@
 # Decentralized Gmail Clone Application
 
+![GMAIL3 (1)](https://user-images.githubusercontent.com/113187996/220174079-aaa271bf-9422-40af-894b-fb864988c172.jpg)
+
 This is a decentralized email application that uses the Ethereum blockchain for secure and decentralized storage. It is built using Vite.js and leverages various smart contracts to store email data on the blockchain.
 
 ## Main Problems Resolved
