@@ -10,11 +10,12 @@ import Editor from './Editor';
 import { BulkAction} from '../utils/contract';
 import {motion} from 'framer-motion'
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 function TabContentInbox(props){
     return <div className='data'>
         {
-            props.tabContent[props.tabController()].length == 0 && <div className='no-content mediumRegular'>
+            props.filtered.length == 0 && <div className='no-content mediumRegular'>
                 
                 {
                     props.onFetching == true ?<p>Loading...</p>:<p>You don't have any {props.tabController()} mails.</p>
@@ -22,7 +23,7 @@ function TabContentInbox(props){
             </div>
         }
         {
-            props.tabContent[props.tabController()].map((e,index)=>{
+            props.filtered.map((e,index)=>{
                 return <motion.div 
                     initial    =  {{ x:-100,opacity:0}}
                     animate    =  {{ x: 0  ,opacity:1 }}
@@ -124,7 +125,6 @@ function TabContentGeneral(props){
         }
         else if(props.indexGeneral == 3){
             props.refreshArchive()
-            console.log(props.archive)
         }
         else if(props.indexGeneral == 1){
             props.refreshStar()
@@ -173,7 +173,7 @@ function TabContentGeneral(props){
                             {props.selectionId.includes(e.index)?"check_box":"check_box_outline_blank"}
                     </span>
                     {
-                        e._spam == false ?
+                        e.spam == false ?
                     
                         <span onClick={()=>{
 
@@ -208,12 +208,12 @@ export default function Home(props){
     const [bulkFlag,setBulkFlag]       = useState(undefined)
     const [onFocus,setOnFocus]         = useState(false)
     const [searchValue,setSearchValue] = useState('')
+    const [modalUser,setModalUser]     = useState(false)
 
-    const [suggestion,setSuggestion]   = useState([
-        'Google Nodes Team - Ethereum'.toLowerCase()
+    const [suggestion,setSuggestion]   = useState([])
+    const [filteredSearch,setFilteredSearch]   = useState(suggestion)
 
-    ])
-    const [filteredSearch,setFilteredSearch] = useState(suggestion)
+    const [filteredResults,setFilteredResults] = useState([])
 
     const tabContent = {
         "primary":props.inbox,
@@ -222,6 +222,8 @@ export default function Home(props){
     }
 
     const refSuggestion = useRef(null)
+    const modalUserRef  = useRef(null)
+    const navigate      = useNavigate()
 
     const tabController = ()=>{
         if(tab == 0){
@@ -237,7 +239,10 @@ export default function Home(props){
     const handleClickOutside = event => {
       if (ref.current && !ref.current.contains(event.target)) {
         setOnFocus(false)
+        setFilteredResults(props.inbox)
+
       }
+
     };
   
     useEffect(() => {
@@ -247,6 +252,10 @@ export default function Home(props){
         document.removeEventListener('click', handleClickOutside);
       };
     });
+
+    useEffect(()=>{
+        setFilteredResults(props.inbox)
+    },[])
 
   
     return <div className='Home'>
@@ -265,7 +274,21 @@ export default function Home(props){
             
                 <div className='searchbar' ref={ref}>
                     <div className={`${onFocus == true ? 'input-focus':''} input`}>
-                        <img src={search} width={26}/>
+
+                        <img src={search} width={26} onClick={()=>{
+                            if(searchValue.trim().length != 0){
+                                window.localStorage.setItem('search', searchValue);
+                                if(index == 0){
+                                    const filtered = props.inbox.filter((item) =>
+                                        item.subject.toLowerCase().includes(searchValue.toLowerCase().trim()) ||
+                                        item.markdown.toLowerCase().includes(searchValue.toLowerCase().trim()) 
+
+                                    );
+                                    setFilteredResults(filtered)
+                                    setSuggestion([searchValue.toLowerCase()])
+                                }
+                            }
+                        }}/>
                         <input value={`${searchValue}`}  onFocus={()=>{
                             setOnFocus(true)
                         }}  onChange={(e)=>{
@@ -292,16 +315,16 @@ export default function Home(props){
                     <motion.div 
                     initial    =  {{ y:100,opacity:1}}
                     animate    =  {{ y: 0  ,opacity:1 }}
-                    transition =  {{ type: 'spring',bounce:1,stiffness: 300,velocity: 6}}
+                    
                         className='searchbar-options'
                     > 
                         <div className='options'>
                             {   filteredSearch.length != 0 &&
                                 filteredSearch.map((el,key)=>{
                                     return <motion.p  key={key}
-                                    initial    =  {{ x:-100,opacity:0}}
-                                    animate    =  {{ x: 0  ,opacity:1 }}
-                                    exit       =  {{ x:-100,opacity:0}}
+                                    initial    =  {{ opacity:0}}
+                                    animate    =  {{ opacity:1 }}
+                                    exit       =  {{ opacity:0}}
                                     transition =  {{ delay:index * 1}}
                                     onClick={()=>{
                                         setSearchValue(el)
@@ -319,7 +342,7 @@ export default function Home(props){
                                     exit       =  {{ x:-100,opacity:0}}
                                     transition =  {{ delay:0 * 0.06}}
                                     className='no-result mediumSans'>
-                                    No results for <span className='boldSans'>{searchValue}</span>
+                                    No previous search keywords 
                                 </motion.div>
                             }
                             
@@ -330,18 +353,61 @@ export default function Home(props){
                 </div>
 
             <div className='toolBox'>
-                <span className="material-symbols-outlined">info</span>
-                <span className="material-symbols-outlined">key</span>
-
+                <span className="material-symbols-outlined" id='info-app'>info</span>
+                <span className="material-symbols-outlined" id='info-contract'>key</span>
+                <div onClick={()=>{setModalUser(!modalUser)}}>
                 <Blockies
-                    seed={props.user.trim().length == 0?props.user:"0xfC4F626a3dfa723E4b501FeE03D1eC5f9f55dcE4"}
+                    seed={props.user.trim().length != 0?props.user:""}
                     size={10} 
                     scale={3} 
-                    color="rgba(255,255,255,.3)" 
+                    color="rgba(255,255,255,.2)" 
                     bgColor="#0b57d0" 
-                    spotColor="rgba(255,255,255,.3)"
+                    spotColor="rgba(255,255,255,.2)"
                     className="identicon" 
                 />
+                </div>
+                
+                { modalUser &&
+                <motion.div 
+                initial    =  {{ y:100,opacity:1}}
+                animate    =  {{ y: 0  ,opacity:1 }}
+                ref        =  {modalUserRef}
+                className='user-more'>
+                    <div className='user-more-details'>
+                    <Blockies
+                        seed={props.user.trim().length != 0?props.user:""}
+                        size={18} 
+                        scale={3} 
+                        color="rgba(255,255,255,.2)" 
+                        bgColor="#0b57d0" 
+                        spotColor="rgba(255,255,255,.2)"
+                        className="identicon" 
+                    />
+                    <div className='data-user'>
+                        <p className='mediumSans'>{props.user.substring(0,6)+"...."+props.user.slice(-6)}</p>
+                        <button onClick={()=>{
+                            window.open(`https://etherscan.io/address/${props.user}`,'_blank')
+                        }} className='mediumSans'>View on Etherscan</button>
+                    </div>
+                    
+                    </div>
+                    <button className='signout' onClick={async()=>{
+                        await window.ethereum.request({
+                            method: "eth_requestAccounts",
+                            params: [{eth_accounts: {}}]
+                        })
+                        props.setUser('')
+                        navigate('/')
+                        
+
+                    }}>
+                        <span className="material-symbols-outlined">logout</span>
+                        <span className='mediumSans'>Sign out</span>
+                    </button>
+                </motion.div>
+                    }
+
+
             </div>
         </div>
 
@@ -668,7 +734,7 @@ export default function Home(props){
                             <button onClick={()=>setTab(1)} className={tab == 1?"tab-element tab-element-active":"tab-element"}>
                             <span className="material-symbols-outlined" style={{
                                 color:tab == 1?"#0b57d0":"rgb(61,61,61)"
-                            }}>confirmation_number</span>
+                            }}>group</span>
                             <span >Promotions</span>
                             </button>
                         </div>
@@ -676,7 +742,7 @@ export default function Home(props){
                             <button onClick={()=>setTab(2)} className={tab == 2?"tab-element tab-element-active":"tab-element"}>
                             <span className="material-symbols-outlined" style={{
                                 color:tab == 2?"#0b57d0":"rgb(61,61,61)"
-                            }}>group</span>
+                            }}>person</span>
                             <span >Social</span>
                             </button>
                         </div>
@@ -699,6 +765,7 @@ export default function Home(props){
                             tabController = {tabController}
                             setBulkFlag   = {setBulkFlag}
                             onFetching    = {props.onFetching}
+                            filtered      = {filteredResults}
                         />
                     }
                     {

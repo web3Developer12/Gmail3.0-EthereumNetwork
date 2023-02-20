@@ -2,8 +2,7 @@ import { ethers } from "ethers";
 import toast from "react-hot-toast";
 import ABI from "../artifacts/contracts/MailSystem.sol/MailSystem.json"
 
-//const addr = "0x3751536b3d6e540c33cC0bC4C28621e15Cb55df8";
-const   addr = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const addr = "0x3751536b3d6e540c33cC0bC4C28621e15Cb55df8";
 
 
 export const fetchInboxSender = async()=>{
@@ -144,7 +143,7 @@ export const fetchUnreadSender= async()=>{
                     spam     : data._spam,
                     inbox    : data._inbox
                 }
-                if(mailUser.read == false && mailUser.inbox){
+                if(mailUser.read == false && mailUser.inbox && mailUser.spam == false){
                     cleaned.push(mailUser)
                 }
             }
@@ -349,8 +348,8 @@ export const BulkAction = async(to,indexes,refLoader,setSelectionId)=>{
 
             const contract   = new ethers.Contract(addr,ABI.abi,signer);
             refLoader.current.continuousStart()
-            const toastId=toast.loading("Confirming transaction");
-            const move = await contract.move(to,indexes)
+            //const toastId=toast.loading("Confirming transaction");
+            const move = await contract.move(to,indexes,{gasLimit:300000})
             await move.wait()
             toast.dismiss(toastId)
             refLoader.current.complete()

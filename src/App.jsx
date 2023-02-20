@@ -13,6 +13,8 @@ import toast, { Toaster } from 'react-hot-toast';
 import Web3 from 'web3'
 import CryptoJS from 'crypto-js'
 import Signature from './components/Signature'
+import 'react-tooltip/dist/react-tooltip.css'
+import { Tooltip as ReactTooltip } from 'react-tooltip'
 
 function generateColorFromAddress(address) {
   const hashInput = Web3.utils.toHex(address);
@@ -144,16 +146,15 @@ function App() {
       ref.current.complete()
     })
   }
-
-
-
-
-
-
   useEffect(()=>{
-    refreshInbox()
-  },[])
+    if(user.trim().length != 0){
+      refreshInbox()
+    }
 
+  },[user])
+  useEffect(()=>{ 
+    getAuthorizedAccounts(setUser)
+} ,[])
   return (
     <div className="App">
       {onSign && <Signature/>}
@@ -170,6 +171,17 @@ function App() {
           },
         }}
       />
+      <ReactTooltip
+        anchorId="info-app"
+        place="bottom"
+        content="Decentralized Gmail"
+      />
+       <ReactTooltip
+        anchorId="info-contract"
+        place="bottom"
+        content="Live on Goerli ETH"
+      />
+
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Loader refLoader={ref} user={user} setUser={setUser}/>}/>
@@ -206,6 +218,7 @@ function App() {
             setTrash     = {setTrash}
             setSent      = {setSent}
             setOnSign    = {setOnSign}
+            setUser      = {setUser}
 
           />
           }/>

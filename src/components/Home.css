@@ -12,7 +12,7 @@
 .navIcon{
     padding:8px;
     transition:.3s;
-    border-radius:100%
+    border-radius:100%;
 
 }
 .navIcon:hover{
@@ -245,6 +245,8 @@ ul li span:nth-child(1){
     display:grid;
     grid-template-columns:repeat(3,25%);
     grid-column-gap:1%;
+    font-family:"GoogleSansMedium";
+
 
 }
 .tab-element{
@@ -455,4 +457,104 @@ ul li span:nth-child(1){
 mark{
     background-color:#0b57d01e;
     color:#0b57d0;
+}
+#info-app{
+    font-size:23px;
+    transition:.1s;
+    font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 48
+}
+#info-app:hover{
+    font-variation-settings:
+    'FILL' 1,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 48
+}
+#info-contract{
+    font-size:23px;
+    transition:.1s;
+    font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 48
+}
+#info-contract:hover{
+    font-variation-settings:
+    'FILL' 1,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 48
+}
+.user-more{
+    position:absolute;
+    background-color:white;
+    bottom:438px;
+    width:254px;
+    z-index:1;
+    border-radius:22px;
+    box-shadow: rgba(87, 87, 87, 0.123) 0px 8px 12px;
+    border:.1px solid rgba(128, 128, 128, 0.274);
+    padding-inline:.5%;
+    padding-top:.5%;
+    padding-bottom:.5%;
+
+    display:flex;
+    flex-direction:column;
+}
+.user-more-details{
+    border-radius:19px;
+    background-color:#e8f0ff;
+    height:94px;
+}
+.user-more-details {
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+    justify-content:flex-start;
+    padding-inline-start:3%;
+}
+
+.data-user{
+    margin-left:6%;
+
+}
+.data-user p{
+    color:rgb(51, 51, 51);
+}
+
+.data-user button{
+    padding:6px;
+    background-color:transparent;
+    border:.1px solid gray;
+    border-radius:6px;
+    transition:.1s;
+    cursor: pointer;
+}
+.data-user button:hover{
+    border:none;
+    border:.1px solid transparent;
+
+    background-color:#0b57d0;
+    color:white;
+}
+.signout{
+    margin-top:1%;
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    padding-inline-start:3%;
+    background-color:transparent;
+    color:rgb(43, 43, 43);
+    height: 45px;
+    border:none;
+    grid-column-gap:5%;
+}
+.signout:hover{
+    background-color:rgba(128, 128, 128, 0.068);
+    border-radius:23px;
 }

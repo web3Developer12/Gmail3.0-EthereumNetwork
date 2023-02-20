@@ -6,3 +6,6 @@ html, body {
 .App{
     overflow:hdestinationden;
 }
+*{
+    font-family:"RobotoRegular";
+}
