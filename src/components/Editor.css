@@ -3,8 +3,8 @@
     right:0;
     bottom:0;
     background-color:white;
-    min-width:455px;
-    height:68%;
+    min-width:355px;
+    height:48%;
     margin-right:5%;
     border-top-left-radius:7px;
     border-top-right-radius:7px;
@@ -66,7 +66,10 @@
     font-size:16px;
     color:rgb(58, 58, 58);
     width:100%;
-
+    font-family:"RobotoRegular";
+}
+.inputEditor .input2::placeholder{
+    font-size:14px;
 }
 .markdownEditor{
     width:100%;
@@ -74,7 +77,7 @@
 }
 textarea{
     width:90%;
-    height:59%;
+    height:49%;
     padding-inline-start:5%;
     resize:none;
     outline:none;
@@ -159,7 +162,9 @@ textarea{
     border-radius:23px;
     padding:6px;
     border: 1px solid #0b57d03f !important;
-
+}
+.valid-addr:hover{
+    text-decoration:underline;
 }
 .tool-icn {
     display:none;

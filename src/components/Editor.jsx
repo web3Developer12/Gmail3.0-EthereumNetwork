@@ -8,6 +8,7 @@ import Blockies from 'react-blockies';
 import { ethers } from 'ethers'
 import EmojiPicker from 'emoji-picker-react';
 import ReactMarkdown from 'react-markdown'
+
 export default function Editor(props){
     const variants = {
         open  :{ y: 0  ,opacity:1 },
@@ -24,7 +25,7 @@ export default function Editor(props){
     return <motion.div 
     
         className="Editor"
-        initial    =  {{ y:310,opacity:0}}
+        initial    =  {{ y:100,opacity:0}}
         animate    =  {props.isOpen == true?variants.open:variants.closed}
         transition =  {!props.isOpen &&{ type: 'spring',bounce:0.1,duration: 0.1,stiffness: 100,velocity: 2}}
         >
@@ -51,14 +52,13 @@ export default function Editor(props){
                     }else{
                         setAddrValid(false)
                     }
-                }} className={` ${addrValid&& "valid-addr"} input1  mediumSans`} type="text" placeholder="0x000000000000000000000000000000000"/>
+                }} className={` ${addrValid&& "valid-addr"} input1  mediumSans`} type="text" placeholder="0x0000000000000000000000"/>
 
                 {
                     addrValid && <
                         motion.div
-                        initial    =  {{ x:100,opacity:1}}
+                        initial    =  {{ x:20,opacity:1}}
                         animate    =  {{ x: 0  ,opacity:1 }}
-                        transition =  {{ type: 'spring',bounce:1,stiffness:200,velocity: 6}}
                     >
                         <Blockies
                             seed={to}
@@ -74,7 +74,7 @@ export default function Editor(props){
             </div>
 
             <div className='inputEditor '>
-                <input value={subject} onChange={(e)=>setSubject(e.target.value)} className='input2 boldSans' type="text" placeholder="Subject"/>
+                <input value={subject} onChange={(e)=>setSubject(e.target.value)} className='input2' type="text" placeholder="Subject"/>
             </div>
         </div>
         <div className='markdownEditor'>

@@ -97,7 +97,7 @@ function App() {
     setOnFetchingUnread(true)
     ref.current.continuousStart()
 
-    fetchSentSender().then((v)=>{
+    fetchUnreadSender().then((v)=>{
       setUnread(v)
       setOnFetchingUnread(false)
       ref.current.complete()

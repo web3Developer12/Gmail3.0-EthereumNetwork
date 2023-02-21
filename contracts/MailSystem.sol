@@ -64,6 +64,7 @@ contract MailSystem {
                 for(uint256 i=0;i<size;++i){
                     uint index = _indexes[i];
                     mails[msg.sender][index]._inbox   = false;
+                    mails[msg.sender][index]._spam    = false;
                     mails[msg.sender][index]._archive = !mails[msg.sender][index]._archive;
                 }
             }
@@ -72,6 +73,7 @@ contract MailSystem {
                 for(uint256 i=0;i<size;++i){
                     uint index = _indexes[i];
                     mails[msg.sender][index]._inbox   = false;
+                    mails[msg.sender][index]._archive = false;
                     mails[msg.sender][index]._spam    = !mails[msg.sender][index]._spam;
                 }
             }
@@ -92,6 +94,7 @@ contract MailSystem {
                     if(mails[msg.sender][index]._trash == false){
                         mails[msg.sender][index]._trash   = true;
                     }else{
+                        mails[msg.sender][index]._trash   = true;
                         mails[msg.sender][index]._tracked = true;
                     }
                 }

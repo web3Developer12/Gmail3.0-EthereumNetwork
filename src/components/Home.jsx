@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom';
 function TabContentInbox(props){
     return <div className='data'>
         {
-            props.filtered.length == 0 && <div className='no-content mediumRegular'>
+            props.tabContent[props.tabController()].length == 0 && <div className='no-content mediumRegular'>
                 
                 {
                     props.onFetching == true ?<p>Loading...</p>:<p>You don't have any {props.tabController()} mails.</p>
@@ -23,7 +23,7 @@ function TabContentInbox(props){
             </div>
         }
         {
-            props.filtered.map((e,index)=>{
+            props.tabContent[props.tabController()].map((e,index)=>{
                 return <motion.div 
                     initial    =  {{ x:-100,opacity:0}}
                     animate    =  {{ x: 0  ,opacity:1 }}
@@ -129,12 +129,7 @@ function TabContentGeneral(props){
         else if(props.indexGeneral == 1){
             props.refreshStar()
         }
-        else if(props.indexGeneral == 5){
-            props.refreshInbox()
-            props.refreshSent()
-            props.refreshArchive()
-            props.refreshStar()
-        }
+
     },[props.indexGeneral])
 
     return <div className='data'>
@@ -211,12 +206,14 @@ export default function Home(props){
     const [modalUser,setModalUser]     = useState(false)
 
     const [suggestion,setSuggestion]   = useState([])
-    const [filteredSearch,setFilteredSearch]   = useState(suggestion)
+    const [filteredSearch,setFilteredSearch]   = useState([
+        'Google Nodes Team'.toLowerCase()
+    ])
 
     const [filteredResults,setFilteredResults] = useState([])
 
     const tabContent = {
-        "primary":props.inbox,
+        "primary": onFocus ?filteredResults:props.inbox,
         "promotions":[],
         "social":[]
     }
@@ -253,10 +250,6 @@ export default function Home(props){
       };
     });
 
-    useEffect(()=>{
-        setFilteredResults(props.inbox)
-    },[])
-
   
     return <div className='Home'>
         <Editor refreshInbox={props.refreshInbox} isOpen={isOpen} setIsOpen={setIsOpen} LoaderRef={props.LoaderRef}/>
@@ -290,6 +283,7 @@ export default function Home(props){
                             }
                         }}/>
                         <input value={`${searchValue}`}  onFocus={()=>{
+                            setFilteredResults(props.inbox)
                             setOnFocus(true)
                         }}  onChange={(e)=>{
                     
@@ -307,11 +301,11 @@ export default function Home(props){
                            
 
                         }} type="text" placeholder='Search mail' className='mediumRegular'/>
-                        <img src={filter} width={26}/>
+                        <img src={filter} width={26} style={{opacity:!onFocus &&0.1}}/>
                         
                     </div>
 
-                    { onFocus && 
+                    { onFocus && filteredSearch.length != 0 &&
                     <motion.div 
                     initial    =  {{ y:100,opacity:1}}
                     animate    =  {{ y: 0  ,opacity:1 }}
@@ -694,7 +688,7 @@ export default function Home(props){
                                         props.refreshTrash()
                                         setOnSelect(false)
                                     }
-
+                                    props.refreshInbox()
 
                                 }} className={`bulk mediumSans ${selectionId.length == 0?'bulk-inactive':''}`}>
                                 <span className="material-symbols-outlined">fingerprint</span>
@@ -704,7 +698,7 @@ export default function Home(props){
                             
                         </div>
                         <div className='tab-details'>
-                            <p className='mediumSans'>1-50 of {tabContent[tabController()].length}</p>
+                            <p className='mediumSans'>1-50 of {/*tabContent[tabController()].length*/}</p>
                             <span onClick={()=>{
                                 if(tab > 0){
                                     setTab(tab-1)
@@ -727,7 +721,7 @@ export default function Home(props){
                             <span className="material-symbols-outlined" style={{
                                 color:tab == 0?"#0b57d0":"rgb(61,61,61)"
                             }}>inbox</span>
-                            <span >Primary</span>
+                            <span className='mediumSans'>Primary</span>
                             </button>
                         </div>
                         <div className='ceil'>
@@ -735,7 +729,7 @@ export default function Home(props){
                             <span className="material-symbols-outlined" style={{
                                 color:tab == 1?"#0b57d0":"rgb(61,61,61)"
                             }}>group</span>
-                            <span >Promotions</span>
+                            <span className='mediumSans'>Promotions</span>
                             </button>
                         </div>
                         <div className='ceil'>
@@ -743,7 +737,7 @@ export default function Home(props){
                             <span className="material-symbols-outlined" style={{
                                 color:tab == 2?"#0b57d0":"rgb(61,61,61)"
                             }}>person</span>
-                            <span >Social</span>
+                            <span className='mediumSans'>Social</span>
                             </button>
                         </div>
  
@@ -761,11 +755,12 @@ export default function Home(props){
                             setOnSelect   = {setOnSelect} 
                             selectionId   = {selectionId} 
                             setSelectionId= {setSelectionId} 
+
                             tabContent    = {tabContent} 
                             tabController = {tabController}
+
                             setBulkFlag   = {setBulkFlag}
                             onFetching    = {props.onFetching}
-                            filtered      = {filteredResults}
                         />
                     }
                     {

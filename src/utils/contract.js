@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 import toast from "react-hot-toast";
 import ABI from "../artifacts/contracts/MailSystem.sol/MailSystem.json"
 
-const addr = "0x3751536b3d6e540c33cC0bC4C28621e15Cb55df8";
+const addr = "0xEBcF2cC9F4A6420c0a806060Dac8C3b9A25F293d";
 
 
 export const fetchInboxSender = async()=>{
@@ -118,6 +118,7 @@ export const fetchSentSender= async()=>{
 }
 
 export const fetchUnreadSender= async()=>{
+    
 
     try{        
         const {ethereum}     = window;
@@ -141,9 +142,17 @@ export const fetchUnreadSender= async()=>{
                     starred  : data._starred,
                     read     : data._read,
                     spam     : data._spam,
-                    inbox    : data._inbox
+                    inbox    : data._inbox,
+                    tracked  : data._tracked,
+                    trash    : data._trash,
+                    sent     : data._sent
                 }
-                if(mailUser.read == false && mailUser.inbox && mailUser.spam == false){
+                console.log(mailUser)
+
+                if( mailUser.read == false && mailUser.trash != true && 
+                    mailUser.inbox && mailUser.spam == false && mailUser.tracked == false &&
+                    mailUser.sent == false
+                ){  
                     cleaned.push(mailUser)
                 }
             }
@@ -180,8 +189,9 @@ export const fetchReadSender= async()=>{
                     starred  : data._starred,
                     spam     : data._spam,
                     read     : data._read,
+                    tracker  : data._tracked
                 }
-                if(mailUser.read == true){
+                if(mailUser.read == true && !mailUser.tracker){
                     cleaned.push(mailUser)
                 }
             }
@@ -291,9 +301,15 @@ export const fetchStarredSender= async()=>{
                     index    : parseInt(data._index),
                     starred  : data._starred,
                     read     : data._read,
-                    spam     : data._spam
+                    spam     : data._spam,
+                    inbox    : data._inbox,
+                    tracked  : data._tracked,
+                    trash    : data._trash,
+                    sent     : data._sent
                 }
-                cleaned.push(mailUser)
+                if(!mailUser.trash){
+                    cleaned.push(mailUser)
+                }
                 
             }
             cleaned.reverse()
@@ -304,7 +320,6 @@ export const fetchStarredSender= async()=>{
         console.log(err);  
     }
 }
-
 
 
 const body = `
@@ -348,7 +363,7 @@ export const BulkAction = async(to,indexes,refLoader,setSelectionId)=>{
 
             const contract   = new ethers.Contract(addr,ABI.abi,signer);
             refLoader.current.continuousStart()
-            //const toastId=toast.loading("Confirming transaction");
+            const toastId=toast.loading("Confirming transaction");
             const move = await contract.move(to,indexes,{gasLimit:300000})
             await move.wait()
             toast.dismiss(toastId)

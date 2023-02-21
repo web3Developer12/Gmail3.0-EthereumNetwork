@@ -12,9 +12,6 @@ async function main() {
   const factory  = await hre.ethers.getContractFactory("MailSystem");
   const contract = await factory.deploy();
   await contract.deployed();
-
-  await contract.compose(owner.address,"Hello Diana !!","About your deal I declined");
-  await contract.compose(owner.address,"QuickNode Team","Feel free to subscribe !");
   await contract.compose(owner.address,"Alchemy University","Your certification is ready !");
   //await contract.move("INBOX","STAR",[0]);
   //const c = await contract.chain()
