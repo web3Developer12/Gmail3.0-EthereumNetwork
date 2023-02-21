@@ -1,6 +1,6 @@
 import './Editor.css'
 import { motion } from 'framer-motion'
-import { ComposeMail } from '../utils/contract'
+import { ComposeMail, replyMail } from '../utils/contract'
 import { useEffect, useState } from 'react'
 import { useRef } from 'react'
 import toast, { Toaster } from 'react-hot-toast';
@@ -20,7 +20,25 @@ export default function Editor(props){
     const [addrValid,setAddrValid] = useState(false)
     const [see,setSee] = useState(false)
 
+    useEffect(()=>{
+        if(props.reply){
+            props.setIsOpen(true)
+            if(props.selected != null){
+                setTo(props.selected.to)
+                setSubject(`Reply to ${
+                    props.selected.to.substring(0,4)+"...."+props.selected.to.slice(-4)
+                }`)
+            }
+        }
+    },[props.reply])
 
+    useEffect(()=>{
+        if(ethers.utils.isAddress(to)){
+            setAddrValid(true)
+        }else{
+            setAddrValid(false)
+        }
+    },[to])
  
     return <motion.div 
     
@@ -35,7 +53,17 @@ export default function Editor(props){
                 props.isOpen && <motion.span 
                     initial    =  {{ opacity:0}}
                     animate    =  {{ opacity:1}}
-                    onClick={()=>{props.setIsOpen(false)}} className="material-symbols-outlined closeBtn"
+                    onClick={()=>{
+                        if(props.reply == false){
+                            props.setIsOpen(false)
+                        }else{
+                            props.setReply(false)
+                            props.setIsOpen(false)
+                        }
+                        setTo('')
+                        setSubject('')
+                        setBody('')
+                    }} className="material-symbols-outlined closeBtn"
                 >close</motion.span>
             }
             
@@ -45,7 +73,7 @@ export default function Editor(props){
             
             <div className='inputEditor mediumSans'>
                 <p className='mediumRegular'>To</p>
-                <input value={to} onChange={(e)=>{
+                <input readOnly={props.reply?true:false} value={to} onChange={(e)=>{
                     setTo(e.target.value);
                     if(ethers.utils.isAddress(e.target.value)){
                         setAddrValid(true)
@@ -74,7 +102,7 @@ export default function Editor(props){
             </div>
 
             <div className='inputEditor '>
-                <input value={subject} onChange={(e)=>setSubject(e.target.value)} className='input2' type="text" placeholder="Subject"/>
+                <input readOnly={props.reply?true:false} value={subject} onChange={(e)=>setSubject(e.target.value)} className='input2' type="text" placeholder="Subject"/>
             </div>
         </div>
         <div className='markdownEditor'>
@@ -86,25 +114,39 @@ export default function Editor(props){
                 <div className='toolBoxS'>
                     <motion.button 
                         onClick={async()=>{
-                            const isAddress = ethers.utils.isAddress(to);
 
-                            if(subject.trim().length >= 1 && body.trim().length >= 1 && isAddress){
+                            if(props.reply == false){
+
+                                const isAddress = ethers.utils.isAddress(to);
+                                if(subject.trim().length >= 1 && body.trim().length >= 1 && isAddress){
+                                    props.LoaderRef.current.continuousStart()
+                                    setSubject('');
+                                    setBody('');
+                                    const toastId = toast.loading('Sending...');
+                                    const action= await ComposeMail(to,subject,body)
+                                    props.LoaderRef.current.complete()
+                                    props.setIsOpen(false);
+                                    await props.refreshInbox()
+                                    toast.dismiss(toastId);
+
+                                }else if(subject.trim().length == 0){
+                                    toast("The subject cannot be empty !")
+                                }else if(body.trim().length == 0){
+                                    toast("The body cannot be empty !")
+                                }else if(isAddress == false){
+                                    toast("Address invalid !")
+
+                                }
+                            }else{
                                 props.LoaderRef.current.continuousStart()
-                                setSubject('');
-                                setBody('');
-                                props.setIsOpen(false);
-                                const toastId = toast.loading('Sending...');
-                                const action= await ComposeMail(to,subject,body)
+                                await replyMail(props.selected.index,to,subject,body)
                                 props.LoaderRef.current.complete()
-                                await props.refreshInbox()
-                                toast.dismiss(toastId);
-                            }else if(subject.trim().length == 0){
-                                toast("The subject cannot be empty !")
-                            }else if(body.trim().length == 0){
-                                toast("The body cannot be empty !")
-                            }else if(isAddress == false){
-                                toast("Address invalid !")
-
+                                setTo('');
+                                setSubject('')
+                                setBody('')
+                                props.setReply(false)
+                                props.setIsOpen(false)
+                                props.refreshReply()
                             }
 
 

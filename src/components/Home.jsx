@@ -7,7 +7,7 @@ import edit from '../assets/img/edit.svg';
 import Blockies from 'react-blockies';
 import { useEffect, useRef, useState } from 'react';
 import Editor from './Editor';
-import { BulkAction} from '../utils/contract';
+import { BulkAction, fetchReplySender} from '../utils/contract';
 import {motion} from 'framer-motion'
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -30,6 +30,7 @@ function TabContentInbox(props){
                     exit       =  {{ x:-100,opacity:0}}
                     transition =  {{ delay:index * 0.06}}
                     key        =  {index}
+                    
                     className={`mail-data ${props.selectionId.includes(e.index)?"mail-data-selected":""}`}
                 >
                     <div className='mail-data-start'>
@@ -57,8 +58,13 @@ function TabContentInbox(props){
 
 
                         }} className="material-symbols-outlined" style={{color:e.starred&&"#f4b400"}}>star</span>
-                        <p className='boldSans' style={{color:e.read && "gray"}}>{e.subject} </p>
-                    </div>
+                        <p className='boldSans' onClick =  {()=>{
+                                props.setOnSelect(true)
+                                props.setSelectionId([e.index])
+                                props.setSelected(e)
+                            }} 
+                            style={{color:e.read && "gray"}}>{e.subject} </p>
+                        </div>
                     <p className='mediumRegular mark' style={{color:e.read && "gray"}}>
                         <span className='boldSans'>{e.markdown.substring(0,23)}</span> - <span className='opp'>{e.markdown.slice(-56)}...</span>
                     </p>
@@ -204,13 +210,18 @@ export default function Home(props){
     const [onFocus,setOnFocus]         = useState(false)
     const [searchValue,setSearchValue] = useState('')
     const [modalUser,setModalUser]     = useState(false)
-
     const [suggestion,setSuggestion]   = useState([])
     const [filteredSearch,setFilteredSearch]   = useState([
         'Google Nodes Team'.toLowerCase()
     ])
-
+    const [selected,setSelected]               = useState(null)
     const [filteredResults,setFilteredResults] = useState([])
+
+    const [reply,setReply] = useState(false)
+    const [replyLoading,setReplyLoading] = useState(false)
+
+    const [dataReply,setDataReply]  = useState([])
+
 
     const tabContent = {
         "primary": onFocus ?filteredResults:props.inbox,
@@ -250,11 +261,24 @@ export default function Home(props){
       };
     });
 
+    const fetchReplies = async()=>{
+        setReplyLoading(true)
+        await fetchReplySender(selected.index).then((res)=>{setDataReply(res)})
+        setReplyLoading(false)
+
+    }
+
+    useEffect(()=>{
+        if(selected != null){
+            fetchReplies()
+        }
+    },[selected])
+
   
     return <div className='Home'>
-        <Editor refreshInbox={props.refreshInbox} isOpen={isOpen} setIsOpen={setIsOpen} LoaderRef={props.LoaderRef}/>
+        <Editor refreshReply={fetchReplies} selected={selected} reply={reply} setReply={setReply} refreshInbox={props.refreshInbox} isOpen={isOpen} setIsOpen={setIsOpen} LoaderRef={props.LoaderRef}/>
         
-        <div className='Navbar'>
+        <div className='Navbar'> 
             <div className='NavMenuTitle'>
                 <img src={hamburger} width={28} className='navIcon' onClick={()=>{
                     setMenuToggle(!menuToggle)
@@ -575,20 +599,32 @@ export default function Home(props){
                 <div className='header'>
                     <div className='header-tools'>
                         <div className='header-tools-row'>
-
-                            <span style={onSelect ? {color:"black"}:{}} onClick={()=>{
-                                    setOnSelect(!onSelect)
-                                    if(onSelect != true){
-                                        setSelectionId([...selectionId])
-                                    }else{
-                                        setSelectionId([])
-                                        setStarredId([])
+                            {
+                                selected != null && <span className="material-symbols-outlined" onClick={()=>{
+                                    setOnSelect(false)
+                                    setSelected(null)
+                                    setSelectionId([])
+                                }}>
+                                    arrow_back
+                                </span>
+                            }
+                            {   selected == null &&
+                                <span style={onSelect ? {color:"black"}:{}} onClick={()=>{
+                                    if(selected == null){
+                                            setOnSelect(!onSelect)
+                                            if(onSelect != true){
+                                                setSelectionId([...selectionId])
+                                            }else{
+                                                setSelectionId([])
+                                                setStarredId([])
+                                            }
+                                            }
+                                    }} className="material-symbols-outlined">
+                                    {
+                                        onSelect ? "check_box":"check_box_outline_blank"
                                     }
-                                }} className="material-symbols-outlined">
-                                {
-                                    onSelect ? "check_box":"check_box_outline_blank"
-                                }
-                            </span>
+                                </span>
+                            }   
 
                             <div className='tool-box-selection'>
                                     {
@@ -661,34 +697,31 @@ export default function Home(props){
                                     if(bulkFlag == "star-flag"){
                                         await BulkAction("STAR",selectionId.sort(),props.LoaderRef,setSelectionId)
                                         props.refreshStar()
-                                        setOnSelect(false)
                                     }
                                     else if(bulkFlag == "archive-flag"){
                                         await BulkAction("ARCHIVE",selectionId.sort(),props.LoaderRef,setSelectionId)
                                         props.refreshArchive()
-                                        setOnSelect(false)
 
                                     }else if(bulkFlag == "spam-flag"){
                                         await BulkAction("SPAM",selectionId.sort(),props.LoaderRef,setSelectionId)
                                         props.refreshSpam()
-                                        setOnSelect(false)
 
                                     }else if(bulkFlag == "unread-flag"){
                                         await BulkAction("READ",selectionId.sort(),props.LoaderRef,setSelectionId)
                                         props.refreshUnread()
-                                        setOnSelect(false)
                                     }
                                     else if(bulkFlag == "read-flag"){
                                         await BulkAction("READ",selectionId.sort(),props.LoaderRef,setSelectionId)
                                         props.refreshRead()
-                                        setOnSelect(false)
                                     }
                                     else if(bulkFlag == "trash-flag"){
                                         await BulkAction("TRASH",selectionId.sort(),props.LoaderRef,setSelectionId)
                                         props.refreshTrash()
-                                        setOnSelect(false)
                                     }
                                     props.refreshInbox()
+                                    if(selected == null){
+                                        setOnSelect(false)
+                                    }
 
                                 }} className={`bulk mediumSans ${selectionId.length == 0?'bulk-inactive':''}`}>
                                 <span className="material-symbols-outlined">fingerprint</span>
@@ -697,6 +730,7 @@ export default function Home(props){
                             
                             
                         </div>
+                        
                         <div className='tab-details'>
                             <p className='mediumSans'>1-50 of {/*tabContent[tabController()].length*/}</p>
                             <span onClick={()=>{
@@ -712,10 +746,10 @@ export default function Home(props){
                         </div>
                     </div>
                     {
-                        selectionId.length > 0 && <div className='selection-banner mediumSans'><span className='num' style={{color:"black"}}>{selectionId.length.toString()}</span> conversations on this page are selected.  You can select more mail as you want in the page</div>
+                        selectionId.length > 0 && selected == null && <div className='selection-banner mediumSans'><span className='num' style={{color:"black"}}>{selectionId.length.toString()}</span> conversations on this page are selected.  You can select more mail as you want in the page</div>
                     }
                     {
-                        index == 0 && <div className='tabs'>
+                        index == 0 && selected == null && <div className='tabs'>
                         <div className='ceil'>
                             <button onClick={()=>setTab(0)} className={tab == 0?"tab-element tab-element-active":"tab-element"}>
                             <span className="material-symbols-outlined" style={{
@@ -747,7 +781,7 @@ export default function Home(props){
                     }
                     
                     {
-                        index == 0 &&
+                        index == 0 && selected == null &&
                         <TabContentInbox 
                             starredId     = {starredId} 
                             setStarredId  = {setStarredId} 
@@ -761,6 +795,8 @@ export default function Home(props){
 
                             setBulkFlag   = {setBulkFlag}
                             onFetching    = {props.onFetching}
+
+                            setSelected   = {setSelected}
                         />
                     }
                     {
@@ -806,6 +842,122 @@ export default function Home(props){
 
 
                         />
+                    }
+                    {
+                        selected != null && <motion.div 
+                            className='details-mail'
+                            initial = {{opacity:0}}
+                            animate = {{opacity:1}}
+                            transition ={{delay:.2}}
+
+                        >
+
+                            <div className='details-header'>
+                                <p className='head mediumRegular'>{selected.subject}</p>
+                                <button className='badge mediumRegular'>inbox</button>
+                            </div>
+
+                            <div >
+                                <div className='details-body'>
+                                    <div className='details-body-ceil'>
+                                        <Blockies
+                                            seed={selected.from.trim().length != 0?props.user:""}
+                                            size={13} 
+                                            scale={3} 
+                                            color="rgba(255,255,255,.2)" 
+                                            bgColor="#6c5ce7" 
+                                            spotColor="rgba(255,255,255,.2)"
+                                            className="identicon" 
+                                        />
+                                        <div>
+                                            <p className='mediumRegular'>{selected.from}</p>
+                                            <p className='to-h mediumRegular'> 
+                                            {props.user.toString() === selected.to.toString()? "Me":"View the sender"}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className='r-side'>
+                                        <span className="material-symbols-outlined">star</span>
+                                        <p>{new Date(selected.timeStamp).toLocaleTimeString()}</p>
+                                    </div>
+                                </div>
+
+                                <pre className='text-body'>
+                                    {selected.markdown}
+                                </pre>
+                            </div>
+
+                            {
+                                dataReply.length == 0 && !replyLoading && 
+                                <div className='reply-forward'>
+                                    <button onClick={()=>{setReply(!reply)}}>
+                                        <span className="material-symbols-outlined">reply</span>
+                                        <span>Reply</span>
+                                    </button>
+                                    <button>
+                                        <span className="material-symbols-outlined">forward</span>
+                                        <span>Forward</span>
+                                    </button>
+                                </div>
+                            }
+                           
+
+                            {
+                                dataReply.map((el,key)=>{
+                                    return <motion.div
+                                        initial    = {{x:100,opacity:0}}
+                                        animate    = {{x:0,opacity:1}}
+                                        transition = {{delay:0.06 * key}}
+                                    >
+                                    <div className='details-body'>
+                                        <div className='details-body-ceil'>
+                                            <Blockies
+                                                seed={el.from.trim().length != 0?props.user:""}
+                                                size={13} 
+                                                scale={3} 
+                                                color="rgba(255,255,255,.2)" 
+                                                bgColor="#6c5ce7" 
+                                                spotColor="rgba(255,255,255,.2)"
+                                                className="identicon" 
+                                            />
+                                            <div>
+                                                <p className='mediumRegular'>{el.from}</p>
+                                                <p className='to-h mediumRegular'> 
+                                                {props.user.toString() === el.to.toString()? "Me":"View the sender"}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className='r-side'>
+                                            <span className="material-symbols-outlined">reply</span>
+                                            <p>{new Date(el.timeStamp).toLocaleTimeString()}</p>
+                                        </div>
+                                    </div>
+    
+                                    <pre className='text-body'>
+                                        {el.markdown}
+                                    </pre>
+                                    {
+                                        key == dataReply.length-1 && !replyLoading && <
+                                            motion.div className='reply-forward'
+                                            initial    = {{opacity:0}}
+                                            animate    = {{opacity:1}}
+                                            transition = {{delay:1}}
+                                        >
+                                        <button onClick={()=>{setReply(!reply)}}>
+                                            <span className="material-symbols-outlined">reply</span>
+                                            <span>Reply</span>
+                                        </button>
+                                        <button>
+                                            <span className="material-symbols-outlined">forward</span>
+                                            <span>Forward</span>
+                                        </button>
+                                    </motion.div>
+                                    }
+                                </motion.div>
+                                })
+                            }
+
+                        </motion.div>  
                     }
                    
                 </div>

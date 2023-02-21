@@ -5,12 +5,12 @@
     background-color:white;
     min-width:355px;
     height:48%;
-    margin-right:5%;
-    border-top-left-radius:7px;
-    border-top-right-radius:7px;
+    margin-right:1%;
+    border-radius:7px;
     box-shadow: rgba(0, 0, 0, 0.192) 0px 5px 15px;
     overflow:hidden;
     z-index:122;
+    margin-bottom:.5%;
 }
 
 .header-edit{

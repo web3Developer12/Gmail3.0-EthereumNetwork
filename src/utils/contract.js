@@ -2,7 +2,9 @@ import { ethers } from "ethers";
 import toast from "react-hot-toast";
 import ABI from "../artifacts/contracts/MailSystem.sol/MailSystem.json"
 
-const addr = "0xEBcF2cC9F4A6420c0a806060Dac8C3b9A25F293d";
+//const addr = "0xcf68237118486F0E7562A83Ba7b4107CF6A8aF00";
+const   addr = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+
 
 
 export const fetchInboxSender = async()=>{
@@ -55,6 +57,8 @@ export const fetchTrashSender= async()=>{
             const contract   = new ethers.Contract(addr,ABI.abi,signer);
             const res        = await contract.trash();
             let cleaned =[]
+            console.log(res)
+
             for(let data of res){
                 const mailUser={
                     from:data._from,
@@ -66,9 +70,12 @@ export const fetchTrashSender= async()=>{
                     index    : parseInt(data._index),
                     starred  : data._starred,
                     read     : data._read,
-                    spam     : data._spam
+                    spam     : data._spam,
+                    trash    : data._trash
                 }
-                cleaned.push(mailUser)
+                if(mailUser.trash ){
+                    cleaned.push(mailUser)
+                }
             }
             cleaned.reverse()
             return cleaned
@@ -149,10 +156,7 @@ export const fetchUnreadSender= async()=>{
                 }
                 console.log(mailUser)
 
-                if( mailUser.read == false && mailUser.trash != true && 
-                    mailUser.inbox && mailUser.spam == false && mailUser.tracked == false &&
-                    mailUser.sent == false
-                ){  
+                if( mailUser.read == false ){  
                     cleaned.push(mailUser)
                 }
             }
@@ -320,6 +324,47 @@ export const fetchStarredSender= async()=>{
         console.log(err);  
     }
 }
+export const fetchReplySender= async(index)=>{
+
+    try{        
+        const {ethereum}     = window;
+        if(ethereum){
+
+            const provider   = new ethers.providers.Web3Provider(ethereum);
+            const signer     = provider.getSigner();
+
+            const contract   = new ethers.Contract(addr,ABI.abi,signer);
+            const res        = await contract.getReply(index);
+            let cleaned =[]
+            for(let data of res){
+                const mailUser={
+                    from:data._from,
+                    to:data._to,
+                    subject:data._subject,
+                    markdown:data._markdown,
+                    timeStamp:parseInt(data._timeStamp),
+
+                    index    : parseInt(data._index),
+                    starred  : data._starred,
+                    read     : data._read,
+                    spam     : data._spam,
+                    inbox    : data._inbox,
+                    tracked  : data._tracked,
+                    trash    : data._trash,
+                    sent     : data._sent
+                }
+                if(!mailUser.trash){
+                    cleaned.push(mailUser)
+                }
+                
+            }
+            return cleaned
+            
+        }
+    }catch(err){
+        console.log(err);  
+    }
+}
 
 
 const body = `
@@ -345,6 +390,25 @@ export const ComposeMail = async(to,subject,body)=>{
             );
             await mail.wait()
             toast("Message sent");
+
+        }
+    }catch(err){
+        console.log(err);  
+    }
+}
+export const replyMail = async(index,to,subject,body)=>{
+
+    try{        
+        const {ethereum}     = window;
+        if(ethereum){
+
+            const provider   = new ethers.providers.Web3Provider(ethereum);
+            const signer     = provider.getSigner();
+
+            const contract   = new ethers.Contract(addr,ABI.abi,signer);
+            const mail       = await contract.reply(index,to,subject,body);
+            await mail.wait()
+            toast("Reply sent");
 
         }
     }catch(err){

@@ -21,30 +21,28 @@ contract MailSystem {
         bool    _read   ;
         bool    _spam   ;
         bool    _trash  ;
-        bool    _tracked;
+        bool    _unTracked;
 
     }
 
-    mapping(address => Mail[]) mails;
+    mapping(address => mapping(uint=>Mail[]))  replies;
+    mapping(address => Mail[])  mails;
     mapping(address => uint256) uid;
-    mapping(address => bool)   scam;
-    uint256 global_index  = 0;
+    mapping(address => bool)    scam;
+    mapping(address => uint)    indexTrack;
 
-    function compose(
-        address _to,string calldata _subject,string calldata _markdown
-    )external{
+    
+    function compose(address _to,string calldata _subject,string calldata _markdown) external{
+
+        uint256 index = indexTrack[msg.sender];
+
         Mail memory _newMail = Mail(
-            msg.sender,_to,_subject,_markdown,block.number,global_index,false,false,false,false,false,false,false,false
+            msg.sender,_to,_subject,_markdown,block.timestamp,index,false,false,false,false,false,false,false,false
         );
         _newMail._inbox = true;
         mails[_to].push(_newMail);
 
-        _newMail._inbox = false;
-        _newMail._sent  = true;
-        global_index ++;
-        _newMail._index = global_index;
-        mails[msg.sender].push(_newMail);
-        global_index++;
+        indexTrack[msg.sender] ++;
 
     }
 
@@ -95,7 +93,7 @@ contract MailSystem {
                         mails[msg.sender][index]._trash   = true;
                     }else{
                         mails[msg.sender][index]._trash   = true;
-                        mails[msg.sender][index]._tracked = true;
+                        mails[msg.sender][index]._unTracked = true;
                     }
                 }
             }
@@ -103,7 +101,18 @@ contract MailSystem {
         
     }
 
-    function inbox() external view returns(Mail[] memory){
+    function reply(uint256 _index,address _to,string calldata _subject,string calldata _markdown) external{
+        Mail memory _newMail = Mail(
+            msg.sender,_to,_subject,_markdown,block.timestamp,_index,false,false,false,false,false,false,false,false
+        );
+        replies[msg.sender][_index].push(_newMail);
+    }
+
+    function getReply(uint256 index) external view returns(Mail[] memory){
+        return replies[msg.sender][index];
+    }
+
+    function inbox()   external view returns(Mail[] memory){
         
         Mail[] storage _mails = mails[msg.sender];
         uint size = _mails.length;
@@ -111,7 +120,14 @@ contract MailSystem {
 
         // Count the number of valid elements
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._inbox && _mails[i]._timeStamp != 0 && _mails[i]._tracked == false) {
+            if (_mails[i]._inbox && _mails[i]._timeStamp != 0 
+                && _mails[i]._unTracked == false &&
+                   _mails[i]._archive   == false &&
+                   _mails[i]._spam      == false &&
+                   _mails[i]._trash     == false &&
+                   _mails[i]._sent      == false 
+
+            ) {
                 validSize++;
             }
         }
@@ -121,7 +137,13 @@ contract MailSystem {
         // Add only the valid elements to the data array
         uint j = 0;
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._inbox && _mails[i]._timeStamp != 0 && _mails[i]._tracked == false) {
+            if (_mails[i]._inbox && _mails[i]._timeStamp != 0 
+                && _mails[i]._unTracked == false &&
+                   _mails[i]._archive   == false &&
+                   _mails[i]._spam      == false &&
+                   _mails[i]._trash     == false &&
+                   _mails[i]._sent      == false 
+            ) {
                 data[j] = _mails[i];
                 j++;
             }
@@ -130,7 +152,7 @@ contract MailSystem {
         return data;
     }
 
-    function sent() external view returns(Mail[] memory){
+    function sent()    external view returns(Mail[] memory){
         
         Mail[] storage _mails = mails[msg.sender];
         uint size = _mails.length;
@@ -138,7 +160,12 @@ contract MailSystem {
 
         // Count the number of valid elements
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._sent && _mails[i]._timeStamp != 0 && _mails[i]._tracked == false) {
+            if (_mails[i]._from == msg.sender && _mails[i]._timeStamp != 0 
+                && _mails[i]._unTracked == false
+                && _mails[i]._archive   == false
+                && _mails[i]._spam      == false
+                && _mails[i]._trash     == false
+            ) {
                 validSize++;
             }
         }
@@ -148,7 +175,12 @@ contract MailSystem {
         // Add only the valid elements to the data array
         uint j = 0;
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._sent && _mails[i]._timeStamp != 0 && _mails[i]._tracked == false) {
+            if (_mails[i]._from == msg.sender && _mails[i]._timeStamp != 0 
+                && _mails[i]._unTracked == false
+                && _mails[i]._archive   == false
+                && _mails[i]._spam      == false
+                && _mails[i]._trash     == false
+            ) {
                 data[j] = _mails[i];
                 j++;
             }
@@ -165,7 +197,13 @@ contract MailSystem {
 
         // Count the number of valid elements
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._archive && _mails[i]._timeStamp != 0 && _mails[i]._tracked == false) {
+            if (_mails[i]._archive && _mails[i]._timeStamp != 0 && 
+                _mails[i]._unTracked == false &&
+                _mails[i]._inbox     == false &&
+                _mails[i]._spam      == false &&
+                _mails[i]._trash     == false 
+
+            ) {
                 validSize++;
             }
         }
@@ -175,7 +213,12 @@ contract MailSystem {
         // Add only the valid elements to the data array
         uint j = 0;
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._archive && _mails[i]._timeStamp != 0 && _mails[i]._tracked == false) {
+            if (_mails[i]._archive && _mails[i]._timeStamp != 0 && 
+                _mails[i]._unTracked == false &&
+                _mails[i]._inbox     == false &&
+                _mails[i]._spam      == false &&
+                _mails[i]._trash     == false 
+            ) {
                 data[j] = _mails[i];
                 j++;
             }
@@ -184,7 +227,7 @@ contract MailSystem {
         return data;
     }
 
-    function star() external view returns(Mail[] memory){
+    function star()    external view returns(Mail[] memory){
         
         Mail[] storage _mails = mails[msg.sender];
         uint size = _mails.length;
@@ -192,7 +235,7 @@ contract MailSystem {
 
         // Count the number of valid elements
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._starred && _mails[i]._timeStamp != 0 && !_mails[i]._archive && _mails[i]._tracked == false) {
+            if (_mails[i]._starred && _mails[i]._timeStamp != 0 && _mails[i]._unTracked == false) {
                 validSize++;
             }
         }
@@ -202,7 +245,7 @@ contract MailSystem {
         // Add only the valid elements to the data array
         uint j = 0;
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._starred && _mails[i]._timeStamp != 0 && !_mails[i]._archive && _mails[i]._tracked == false) {
+            if (_mails[i]._starred && _mails[i]._timeStamp != 0 && _mails[i]._unTracked == false) {
                 data[j] = _mails[i];
                 j++;
             }
@@ -211,7 +254,7 @@ contract MailSystem {
         return data;
     }
     
-    function spam() external view returns(Mail[] memory){
+    function spam()    external view returns(Mail[] memory){
         
         Mail[] storage _mails = mails[msg.sender];
         uint size = _mails.length;
@@ -219,7 +262,13 @@ contract MailSystem {
 
         // Count the number of valid elements
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._spam && _mails[i]._timeStamp != 0 && _mails[i]._tracked == false) {
+            if (_mails[i]._spam && _mails[i]._timeStamp != 0 && 
+                _mails[i]._unTracked == false &&
+                _mails[i]._inbox     == false &&
+                _mails[i]._archive   == false &&
+                _mails[i]._trash     == false 
+
+            ) {
                 validSize++;
             }
         }
@@ -229,7 +278,12 @@ contract MailSystem {
         // Add only the valid elements to the data array
         uint j = 0;
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._spam && _mails[i]._timeStamp != 0 && _mails[i]._tracked == false) {
+            if (_mails[i]._spam && _mails[i]._timeStamp != 0 && 
+                _mails[i]._unTracked == false &&
+                _mails[i]._inbox     == false &&
+                _mails[i]._archive   == false &&
+                _mails[i]._trash     == false 
+            ) {
                 data[j] = _mails[i];
                 j++;
             }
@@ -237,7 +291,8 @@ contract MailSystem {
 
         return data;
     }
-    function trash() external view returns(Mail[] memory){
+
+    function trash()   external view returns(Mail[] memory){
         
         Mail[] storage _mails = mails[msg.sender];
         uint size = _mails.length;
@@ -245,7 +300,12 @@ contract MailSystem {
 
         // Count the number of valid elements
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._trash && _mails[i]._timeStamp != 0 && _mails[i]._tracked == false) {
+            if (_mails[i]._trash && _mails[i]._timeStamp != 0 && 
+                _mails[i]._unTracked == false &&
+                _mails[i]._inbox     == false &&
+                _mails[i]._archive   == false &&
+                _mails[i]._spam     == false 
+            ) {
                 validSize++;
             }
         }
@@ -255,7 +315,12 @@ contract MailSystem {
         // Add only the valid elements to the data array
         uint j = 0;
         for (uint i = 0; i < size; i++) {
-            if (_mails[i]._trash && _mails[i]._timeStamp != 0 && _mails[i]._tracked == false) {
+            if (_mails[i]._trash && _mails[i]._timeStamp != 0 && 
+                _mails[i]._unTracked == false &&
+                _mails[i]._inbox     == false &&
+                _mails[i]._archive   == false &&
+                _mails[i]._spam     == false 
+            ) {
                 data[j] = _mails[i];
                 j++;
             }
@@ -264,12 +329,8 @@ contract MailSystem {
         return data;
     }
 
-    function chain() external view returns(Mail[] memory){
+    function chain()   external view returns(Mail[] memory){
         return mails[msg.sender];
     }
-    
 
-
-   
-   
 }
