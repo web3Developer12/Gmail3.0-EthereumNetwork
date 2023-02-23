@@ -1,4 +1,4 @@
-# Decentralized Gmail Clone Application
+# Decentralized Email Application
 
 ![GMAIL3 (1)](https://user-images.githubusercontent.com/113187996/220174079-aaa271bf-9422-40af-894b-fb864988c172.jpg)
 
