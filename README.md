@@ -27,3 +27,10 @@ To get started, follow these instructions:
 ## Conclusion
 
 This decentralized email application solves some of the biggest problems with traditional email services, including data privacy, censorship resistance, and trust and security. It offers a secure and private way to send and receive emails, while ensuring that your data is always under your control.
+
+## Demo
+
+https://user-images.githubusercontent.com/113187996/220983149-29d1428a-b480-4e1d-91d1-5d6f0ef78a4f.mp4
+
+
+
