@@ -1,0 +1,63 @@
+.Loader{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    user-select:none;
+    height:100vh;
+    background-color:white;
+}
+.logo-txt{
+    font-size:3em;
+    color:#27272796;
+    display:flex;
+    grid-column-gap:4px;
+    margin-top:1%;
+}
+.darken{
+    color:#272727de;
+}
+.loader-bar{
+    background-color:#2f39492a;
+    width:15%;
+    height: 4px;
+    color:transparent;
+    margin-top:2%;
+    overflow:hidden;
+
+}
+.loader-value{
+    background-color:#D9113A;
+    height: 100%;
+}
+.connect{
+    margin-top:1%;
+    width:245px;
+    height:45px;
+    cursor: pointer;
+    border:none;
+    font-size:17px;
+
+    color:white;
+    border-radius:5px;
+    transition:.1s;
+    background-color:white;
+    border:1px solid #0b57d0;
+    color:#0b57d0;
+}
+.connect:hover{
+    background-color:white;
+    border:1px solid #0b57d0;
+    color:#0b57d0;
+    background-color:#0b57d0;
+    border:1px solid #0b57d0;
+    color:white;
+}
+.sub{
+    text-align:center;
+    color:rgba(44, 44, 44, 0.719);
+    margin-top:1%;
+    font-size:16px;
+    font-family:"RobotoRegular";
+
+}
